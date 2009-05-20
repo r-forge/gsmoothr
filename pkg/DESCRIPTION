@@ -1,0 +1,10 @@
+Package: gsmoothr
+Version: 0.1.0
+Date: 2009/05/21
+Title: Smoothing tools
+Author: Mark Robinson <mrobinson@wehi.edu.au>
+Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+Depends: R (>= 2.8.0), methods
+Description: Tools rewritten in C for various smoothing taks
+License: LGPL version 2 or newer
+Packaged: 2009-05-20 14:04:57 UTC; mrobinson
