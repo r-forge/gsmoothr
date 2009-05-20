@@ -1,0 +1,174 @@
+\name{regionStats}
+\alias{regionStats}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{ ~~function to do ... ~~ }
+\description{
+  ~~ A concise (1-5 lines) description of what the function does. ~~
+}
+\usage{
+regionStats(cs, design, ind = NULL, fdrLevel = 0.05, nPermutations = 5, probeWindow = 600, meanTrim = 0.1, nProbes = 10, verbose = TRUE)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{cs}{ ~~Describe \code{cs} here~~ }
+  \item{design}{ ~~Describe \code{design} here~~ }
+  \item{ind}{ ~~Describe \code{ind} here~~ }
+  \item{fdrLevel}{ ~~Describe \code{fdrLevel} here~~ }
+  \item{nPermutations}{ ~~Describe \code{nPermutations} here~~ }
+  \item{probeWindow}{ ~~Describe \code{probeWindow} here~~ }
+  \item{meanTrim}{ ~~Describe \code{meanTrim} here~~ }
+  \item{nProbes}{ ~~Describe \code{nProbes} here~~ }
+  \item{verbose}{ ~~Describe \code{verbose} here~~ }
+}
+\details{
+  ~~ If necessary, more details than the description above ~~
+}
+\value{
+  ~Describe the value returned
+  If it is a LIST, use
+  \item{comp1 }{Description of 'comp1'}
+  \item{comp2 }{Description of 'comp2'}
+  ...
+}
+\references{ ~put references to the literature/web site here ~ }
+\author{ ~~who you are~~ }
+\note{ ~~further notes~~ 
+
+ ~Make other sections like Warning with \section{Warning }{....} ~
+}
+\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (cs, design, ind = NULL, fdrLevel = 0.05, nPermutations = 5, 
+    probeWindow = 600, meanTrim = 0.1, nProbes = 10, verbose = TRUE) 
+{
+    require(aroma.affymetrix)
+    getBed <- function(scoreV, chrV, posV, cut = NULL, nProbes = 10, 
+        indexExtend = 0, ...) {
+        if (is.null(cut)) 
+            stop("Need to specify 'cut'.")
+        posInd <- getRegions(scoreV, nProbes = nProbes, cutoff = cut, 
+            count = FALSE, ...)
+        if (is.null(posInd)) 
+            return(list())
+        posReg <- data.frame(chr = paste("chr", chrV[posInd$start], 
+            sep = ""), start = posV[posInd$start - indexExtend], 
+            end = posV[posInd$end + indexExtend], score = 0)
+        for (i in 1:nrow(posInd)) posReg$score[i] <- round(median(scoreV[(posInd$start[i]:posInd$end[i])]), 
+            3)
+        posReg
+    }
+    getRegions <- function(score, nProbes = 3, cutoff = 2, count = TRUE, 
+        doAbsolute = TRUE) {
+        if (doAbsolute) 
+            probes <- abs(score) > cutoff
+        else probes <- score > cutoff
+        df <- diff(probes)
+        st <- which(df == 1) + 1
+        en <- which(df == -1)
+        en <- en[en >= st[1]]
+        st <- st[1:length(en)]
+        w <- (en - st + 1) >= nProbes
+        if (count) 
+            sum(w, na.rm = TRUE)
+        else {
+            if (sum(w) == 0) 
+                return(NULL)
+            else data.frame(start = st, end = en)[w, ]
+        }
+    }
+    fdrTable <- function(realScore, permScore, minCutoff = 0.5, 
+        maxCutoff = max(abs(permScore), na.rm = TRUE), cutsLength = 100, 
+        nProbes = 10, verbose = TRUE, ...) {
+        cuts <- seq(minCutoff, maxCutoff, length = cutsLength)
+        fdr <- matrix(, nr = length(cuts), nc = 4)
+        colnames(fdr) <- c("cutoff", "neg", "pos", "fdr")
+        for (i in 1:length(cuts)) {
+            pos <- getRegions(realScore, nProbes = nProbes, cutoff = cuts[i], 
+                ...)
+            neg <- getRegions(permScore, nProbes = nProbes, cutoff = cuts[i], 
+                ...)
+            fdr[i, ] <- c(cuts[i], neg, pos, min(neg/pos, 1))
+            cat(".")
+        }
+        cat("\n")
+        as.data.frame(fdr)
+    }
+    cdf <- getCdf(cs)
+    if (is.null(ind)) 
+        ind <- getCdfIndices(cdf, useNames = FALSE, unlist = TRUE)
+    if (nrow(design) != nbrOfArrays(cs)) 
+        stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
+    acp <- AromaCellPositionFile$byChipType(getChipType(cdf))
+    ch <- acp[ind, 1, drop = TRUE]
+    sp <- acp[ind, 2, drop = TRUE]
+    uch <- unique(ch)
+    w <- which(rowSums(design != 0) > 0)
+    cs <- extract(cs, w, verbose = verbose)
+    dmP <- log2(extractMatrix(cs, cells = ind, verbose = verbose))
+    diffs <- dmP \%*\% design[w, ]
+    w <- rowSums(is.na(diffs)) == 0
+    if (verbose) 
+        cat("Removing", sum(!w), "rows, due to NAs.\n")
+    diffs <- diffs[w, , drop = FALSE]
+    ch <- ch[w]
+    sp <- sp[w]
+    rm(dmP)
+    ifelse(verbose, print(gc()), gc())
+    tmeanReal <- matrix(, nr = nrow(diffs), nc = ncol(diffs))
+    tmeanPerms <- lapply(as.list(colnames(design)), FUN = function(u) {
+        matrix(NA, nr = nrow(diffs), nc = nPermutations)
+    })
+    regions <- fdrTabs <- vector("list", length(tmeanPerms))
+    names(regions) <- names(fdrTabs) <- colnames(design)
+    ifelse(verbose, print(gc()), gc())
+    for (col in 1:ncol(diffs)) {
+        if (verbose) 
+            cat("Calculating trimmed means for column", col, 
+                "of design matrix:\n")
+        for (ii in 1:length(uch)) {
+            if (verbose) 
+                cat(" ", uch[ii], "-", sep = "")
+            w <- which(ch == uch[ii])
+            tmeanReal[w, col] <- tmeanC(sp[w], diffs[w, col], 
+                probeWindow = probeWindow, trim = meanTrim, nProbes = nProbes)
+            if (verbose) 
+                cat("R")
+            for (j in 1:ncol(tmeanPerms[[col]])) {
+                s <- sample(1:nrow(tmeanReal))
+                tmeanPerms[[col]][w, j] <- tmeanC(sp[w], diffs[s, 
+                  col][w], probeWindow = probeWindow, trim = meanTrim, 
+                  nProbes = nProbes)
+                if (verbose) 
+                  cat(".")
+            }
+        }
+        if (verbose) 
+            cat("\nCalculating FDR table.\n")
+        mx <- max(abs(tmeanPerms[[col]]), na.rm = TRUE)
+        z <- apply(tmeanPerms[[col]], 2, FUN = function(u) fdrTable(realScore = tmeanReal[, 
+            col], permScore = u, maxCut = mx, nProbes = nProbes, 
+            cutsLength = 40))
+        fdrTabs[[col]] <- z[[1]]
+        for (i in 2:length(nPermutations)) fdrTabs[[col]][, 2:3] <- fdrTabs[[col]][, 
+            2:3] + z[[i]][, 2:3]
+        fdrTabs[[col]]$fdr <- pmin(fdrTabs[[col]]$neg/fdrTabs[[col]]$pos, 
+            1)
+        w <- which(fdrTabs[[col]]$fdr < fdrLevel)
+        cut <- max(fdrTabs[[col]]$cut[w], na.rm = TRUE)
+        if (verbose) 
+            cat("Using cutoff of", cut, "for FDR of", fdrLevel, 
+                "\n")
+        regions[[col]] <- getBed(tmeanReal[, col], chrV = ch, 
+            posV = sp, nProbes = nProbes, cut = cut)
+    }
+    return(list(regions = regions, tmeanReal = tmeanReal, tmeanPerms = tmeanPerms, 
+        fdrTables = fdrTabs))
+  }
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
