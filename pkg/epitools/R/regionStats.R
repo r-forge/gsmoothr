@@ -1,52 +1,67 @@
-regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ...) UseMethod("regionStats")
+regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE, ...) UseMethod("regionStats")
 
-.regionStats<- function(diffs, design, ch, sp, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE) {
+.regionStats<- function(diffs, design, ch, sp, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE) {
   getBed <- function(scoreV, chrV, posV, cut=NULL, nProbes=10, indexExtend=0, ...) {
     if( is.null(cut) )
       stop("Need to specify 'cut'.")
-    posInd <- getRegions( scoreV, nProbes=nProbes, cutoff=cut, count=FALSE , ...)
+    posInd <- getRegions( scoreV, chrV, nProbes=nProbes, cutoff=cut, count=FALSE , ...)
     if( is.null(posInd) )
       return(list())
     posReg <- data.frame(chr=paste("chr",chrV[posInd$start],sep=""),
                          start=posV[posInd$start-indexExtend],
-	                     end=posV[posInd$end+indexExtend], score=0)
+	                     end=posV[posInd$end+indexExtend], score=0, stringsAsFactors=F)
     for(i in 1:nrow(posInd))
       posReg$score[i] <- round(median(scoreV[ (posInd$start[i]:posInd$end[i]) ]),3)
     posReg
   }
 
   
-  getRegions <- function(score, nProbes=3, cutoff=2, count=TRUE, doAbsolute = TRUE) {
-    if (doAbsolute)
-      probes <- abs(score) > cutoff 
-    else
-      probes <- score > cutoff 
-    df <- diff(probes)
-    st <- which( df==1 )+1
-    en <- which(df ==-1 )
-    en <- en[ en>=st[1] ]
-    st <- st[1:length(en)]
-    w <- (en-st+1) >= nProbes
-    if (count)
-      sum(w,na.rm=TRUE)
-    else {
-      if (sum(w)==0)
-        return(NULL)
+  getRegions <- function(score, chrV, nProbes=3, cutoff=2, count=TRUE, doAbsolute = TRUE, fdrProbes = FALSE) {
+    getRegionsChr <- function(ind, score, nProbes=3, cutoff=2, count=TRUE, doAbsolute = TRUE, fdrProbes = FALSE) {
+      if (doAbsolute)
+        probes <- abs(score[ind]) > cutoff 
       else
-	    data.frame(start=st,end=en)[w,]
+        probes <- score[ind] > cutoff 
+      df <- diff(probes)
+      st <- ind[which( df==1 )+1]
+      en <- ind[which(df ==-1 )]
+      en <- en[ en>=st[1] ]
+      st <- st[1:length(en)]
+      w <- (en-st+1) >= nProbes
+      if (count)
+        if (fdrProbes)
+          sum(w,en[w]-st[w])
+        else
+          sum(w,na.rm=TRUE)
+      else {
+        if (sum(w)==0)
+          return(data.frame(start=NULL, end=NULL))
+        else
+	      data.frame(start=st,end=en)[w,]
+      }
+    }
+
+    chrInds <- split(1:length(score), chrV)
+    if (count) 
+      return(sum(sapply(chrInds, getRegionsChr, score, nProbes, cutoff, count, doAbsolute, fdrProbes=fdrProbes)))
+    else {
+      regTable <- data.frame(start=NULL, end=NULL)
+      for (i in 1:length(chrInds)) regTable <- rbind(regTable, getRegionsChr(chrInds[[i]],score, nProbes, cutoff, count, doAbsolute))  
+      return(regTable)
     }
   }
+
   
 
-  fdrTable <- function(realScore, permScore, minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE ), cutsLength=100, nProbes = 10, verbose=TRUE, ...) {
+  fdrTable <- function(realScore, permScore, chrV, minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE ), cutsLength=100, nProbes = 10, verbose=TRUE, fdrProbes = FALSE, ...) {
 
     cuts <- seq(minCutoff,maxCutoff,length=cutsLength)
 
     fdr <- matrix(,nr=length(cuts),nc=4)
     colnames(fdr) <- c("cutoff","neg","pos","fdr")
     for(i in 1:length(cuts)) {
-      pos <- getRegions( realScore, nProbes=nProbes, cutoff=cuts[i], ... )
-      neg <- getRegions( permScore, nProbes=nProbes, cutoff=cuts[i], ... )
+      pos <- getRegions( realScore, chrV, nProbes=nProbes, cutoff=cuts[i], fdrProbes=fdrProbes, ... )
+      neg <- getRegions( permScore, chrV, nProbes=nProbes, cutoff=cuts[i], fdrProbes=fdrProbes, ... )
       fdr[i,] <- c(cuts[i],neg,pos,min(neg/pos,1))
       cat(".")
     }
@@ -75,17 +90,17 @@ regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=
       if( verbose )
 	    cat(" ", uch[ii], "-", sep="")
 	  w <- which(ch == uch[ii])
-      tmeanReal[w,col] <- trimmedMean(sp[w], diffs[w,col], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
+      #tmeanReal[w,col] <- trimmedMean(sp[w], diffs[w,col], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
 	  
-	  #tmeanReal[w,col] <- tmeanC(sp[w], diffs[w,col], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
+	  tmeanReal[w,col] <- tmeanC(sp[w], diffs[w,col], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
   	  if( verbose )
 	      cat("R")
 	  for(j in 1:ncol(tmeanPerms[[col]])) {
 	    s <- sample(1:nrow(tmeanReal))
-	    tmeanPerms[[col]][w,j] <- trimmedMean(sp[w], diffs[s,col][w], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
+	    #tmeanPerms[[col]][w,j] <- trimmedMean(sp[w], diffs[s,col][w], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
 		#return(list(s=s, diffs=diffs, col=col, sp=sp, w=w))
 		#save(diffs,s,col,w,sp,j,file="preERROR.Rdata")
-	    #tmeanPerms[[col]][w,j] <- tmeanC(sp[w], diffs[s,col][w], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
+	    tmeanPerms[[col]][w,j] <- tmeanC(sp[w], diffs[s,col][w], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
 		if( verbose )
 	      cat(".")
 
@@ -95,7 +110,7 @@ regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=
       cat("\nCalculating FDR table.\n")
     # calculate FDR table
 	mx <- max(abs(tmeanPerms[[col]]),na.rm=TRUE)
-	z <- apply(tmeanPerms[[col]], 2, FUN=function(u) fdrTable(realScore=tmeanReal[,col], permScore=u, maxCut=mx, nProbes=nProbes, cutsLength=40))
+	z <- apply(tmeanPerms[[col]], 2, FUN=function(u) fdrTable(realScore=tmeanReal[,col], permScore=u, chrV=ch,  maxCut=mx, nProbes=nProbes, cutsLength=40, fdrProbes=fdrProbes))
 	fdrTabs[[col]] <- z[[1]]
 	for(i in 2:length(nPermutations))
 	  fdrTabs[[col]][,2:3] <- fdrTabs[[col]][,2:3] + z[[i]][,2:3]
@@ -103,7 +118,7 @@ regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=
 	
 	# select lowest cutoff such that FDR is achieved
 	w <- which(fdrTabs[[col]]$fdr < fdrLevel )
-	cut <- max( fdrTabs[[col]]$cut[w], na.rm=TRUE )
+	cut <- min( fdrTabs[[col]]$cut[w], na.rm=TRUE )
 	
     if( verbose )
       cat("Using cutoff of", cut, "for FDR of", fdrLevel,"\n")
@@ -157,10 +172,10 @@ regionStats.AffymetrixCelSet <- function(cs, design, fdrLevel=0.05, nPermutation
   rm(dmP)
   ifelse( verbose, print(gc()), gc())
 
-  return(.regionStats(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose))
+  return(.regionStats(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose, fdrProbes))
 }
 
-regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ndf) {
+regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
   #nimblegen data
 
   # cut down on the amount of data read, if some rows of the design matrix are all zeros
@@ -170,7 +185,6 @@ regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutatio
   w <- rowSums( is.na(diffs) )==0
   if( verbose )
     cat("Removing", sum(!w), "rows, due to NAs.\n")
-
-  return(.regionStats(diffs, design, ch=gsub("chr","",ndf$chr), sp=ndf$position, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose))
+  return(.regionStats(diffs, design, ch=gsub("chr","",ndf$chr), sp=ndf$position, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose, fdrProbes))
 }
 
