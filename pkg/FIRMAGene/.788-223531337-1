@@ -1,0 +1,10 @@
+Package: metab
+Version: 0.2.4
+Date: 2008/01/29
+Title: Analysis of Metabolomics GC/MS Data
+Author: Mark Robinson <mrobinson@wehi.edu.au>
+Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+Depends: R (>= 2.5.0), xcms, gplots, gdata
+Description: Peak Finding, Alignment, Normalization, Statistical Analysis of GC/MS Data
+License: LGPL
+Packaged: Mon Jan 28 19:24:08 2008; mrobinson

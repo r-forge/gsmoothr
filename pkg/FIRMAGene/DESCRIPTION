@@ -1,0 +1,11 @@
+Package: FIRMAGene
+Version: 0.9.2
+Date: 2009/02/12
+Title: FIRMAGene - differential splicing for Affymetrix Gene 1.0 ST
+Author: Mark Robinson <mrobinson@wehi.edu.au>
+Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+Depends: R (>= 2.8.0)
+Suggests: aroma.affymetrix, GenomeGraphs, biomaRt
+Description: Tools for the analysis of differential splicing for microarray data
+License: LGPL
+Packaged: Sun Jun  8 21:43:31 2008; mrobinson

@@ -1,0 +1,123 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\topmargin 0in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+\evensidemargin 0in
+\textwidth 176mm
+\textheight 215mm
+
+
+\begin{document}
+
+%\VignetteIndexEntry{Using FIRMAGene -- Finding Isoforms using Robust Multichip Analysis for (Affymetrix) Gene platforms}
+
+\title{\texttt{FIRMAGene}: Finding Isoforms using Robust Multichip Analysis for (Affymetrix) Gene platforms}
+\author{Mark Robinson \\ \texttt{mrobinson@wehi.edu.au}}
+\maketitle
+
+\section{Introduction}
+
+\noindent This document gives a brief introduction to the \texttt{FIRMAGene} package, which is designed to detect {\em differential} splicing events using the Affymetrix Gene 1.0 ST platform.  On this platform, there are probes for each known exon along the gene, but not necessarily the (generally) 4 probes per probe selection region (PSR) that the Exon 1.0 ST chip gives.  After robustly fitting the RMA linear model, a persistence of non-zero residuals (all in the same direction) are often evidence of alternative splice forms.  We illustrate a standard processing of the data for 
+
+\section{An analysis of the Affymetrix public tissue panel dataset}
+
+Using the R \texttt{aroma.affymetrix} package, we process the data and get access to the residuals.  If you are new to using \texttt{aroma.affymetrix}, there are installation and setup instructions at:
+
+\texttt{http://groups.google.com/group/aroma-affymetrix/}
+
+Here, we use the Affymetrix 33-sample (11-tissue) dataset to illustrate some tissue-specific alternative splicing candidates.
+
+First, we preprocess the data.
+
+<<libraries>>=
+library(aroma.affymetrix)
+
+cdf <- AffymetrixCdfFile$fromChipType("HuGene-1_0-st-v1",verbose=-1)
+
+cs <- AffymetrixCelSet$fromName("tissues",cdf=cdf,verbose=-1)
+getNames(cs)
+
+bc <- RmaBackgroundCorrection(cs)
+csBC <- process(bc,verbose=-1)
+qn <- QuantileNormalization(csBC, typesToUpdate="pm")
+csN <- process(qn, verbose=-1) #time required first time through
+@
+
+Because the Gene 1.0 ST chips use some probes in multiple probesets and  \texttt{aroma.affymetrix} only stores a single probe effect for each probe, it is necessary to convert the chip definition file (CDF) to a {\em unique} format.  This is done below, followed by the fitting of the RMA linear model and reading the annotation files from Affymetrix.
+
+<<preprocessing>>=
+cdfU <- getUniqueCdf(cdf,verbose=-1)
+csNU <- convertToUnique(csN,verbose=-1)
+
+plm <- RmaPlm(csNU)
+fit(plm, verbose=-1) #time required first time through
+
+cls <- gsub("TisMap_","",gsub("_0[1-3]_v1_WTGene1","",getNames(cs)))
+table(cls)
+
+library(FIRMAGene)
+
+hgnetaffx <- read.csv("HuGene-1_0-st-v1.na25.hg18.transcript.csv",sep=",",skip=19,header=TRUE,comment.char="")
+probetab <- read.table("HuGene-1_0-st-v1.probe.tab",sep="\t",header=TRUE,comment.char="",stringsAsFactors=FALSE)
+
+u <- which(getUnitNames(cdfU) %in% hgnetaffx$probeset_id[hgnetaffx$category == "main" & hgnetaffx$total_probes > 7 & hgnetaffx$total_probes < 200])
+
+length(u)
+@
+
+Next, we call the main function \texttt{FIRMAGene} to do the calculations, according to the sample groups specified.
+
+<<firmagene>>=
+fg <- FIRMAGene(plm, idsToUse=u, cls=cls, verbose=TRUE, nSamples = 2000, seed = 1976)
+@
+
+
+<<exampleplot,plot=TRUE,height=10,width=7>>=
+sampNames <- getNames(csNU)
+
+library(GenomeGraphs)
+mart <- useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+
+top20 <- topSplices(fg,20)
+i <- 1
+col <- rep("black",33)
+ww <- grep(top20$Sample[i],sampNames)
+col[ ww ] <- "blue"
+lwd <- c(1,3)[(col!="black")+1]
+try(detach("package:grid"),silent=TRUE)  # clash of the 'getNames' function
+y <- getDetails(plm,id=top20$ID[i],mart=mart,probesets=probetab,col=col,lwd=lwd)
+  
+library(grid)
+y[[1]]@title <- paste( y[[1]]@title, paste("blue",top20$Sample[i],sep="="), sep=" -- ")
+gdPlot(y)
+@
+
+
+
+\section{References}
+
+See the following for further details:
+
+\begin{enumerate}
+
+\item Robinson MD and Speed TP. {\em Differential splicing from whole transcript microarrays.} {\bf BMC Bioinformatics}. In press.
+
+\end{enumerate}
+
+\section{This vignette was built with/at ...}
+
+<<session>>=
+sessionInfo()
+date()
+@
+
+\end{document}
+
+
