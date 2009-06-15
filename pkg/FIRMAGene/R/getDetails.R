@@ -49,8 +49,11 @@ getDetails<-function(plm,probesets,id="7952953",mart=NULL,verticalBars=FALSE,gen
     print(gid)
   b <- getBM(geneSymbolId,filters="ensembl_gene_id",values=gid,mart=mart)
   ti <- new("Title", title = paste(getUnitNames(cdf)[unit],gid,b[1,1],sep=" -- "), dp = DisplayPars(color = "darkred"))
-  if( is.null(gid) )
-    return(list(ti,gr))
-  tr <- new("Transcript",id=gid,biomart=mart,dp=DisplayPars(plotId=TRUE))
-  list(ti,ea1,ga,ea2,gr,tr)
+  if( !is.null(gid) )
+    tr <- new("Transcript",id=gid,biomart=mart,dp=DisplayPars(plotId=TRUE))
+  else
+    tr <- NULL
+  returnList <- list(ti,ea1,ga,ea2,gr,tr)
+  keep <- !sapply(returnList,is.null)
+  return(returnList[keep])  
 }
