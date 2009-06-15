@@ -42,11 +42,13 @@ getDetails<-function(plm,probesets,id="7952953",mart=NULL,verticalBars=FALSE,gen
   ch <- gsub("chr","",pm[1,"seqname"])
   gr<-new("GeneRegion", chromosome = ch,
                    start = as.numeric(min(pm[1,"start"])), end = as.numeric(pm[1,"stop"]), strand = as.character(pm[1,"strand"]), biomart = mart)
-	if (verbose)
-    print(gr)
   gid <- names(sort(table(gr@ens[,"ensembl_gene_id"]),decreasing=TRUE)[1])
   if (verbose)
     print(gid)
+  if( nrow(gr@ens)==0 )
+    gr <- NULL
+	if (verbose)
+    print(gr)
   b <- getBM(geneSymbolId,filters="ensembl_gene_id",values=gid,mart=mart)
   ti <- new("Title", title = paste(getUnitNames(cdf)[unit],gid,b[1,1],sep=" -- "), dp = DisplayPars(color = "darkred"))
   if( !is.null(gid) )
