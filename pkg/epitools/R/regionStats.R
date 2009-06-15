@@ -1,4 +1,6 @@
-regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE, ...) UseMethod("regionStats")
+#regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE, ...) UseMethod("regionStats")
+
+regionStats <- function(...) UseMethod("regionStats")
 
 .regionStats<- function(diffs, design, ch, sp, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE) {
   getBed <- function(scoreV, chrV, posV, cut=NULL, nProbes=10, indexExtend=0, ...) {
@@ -132,7 +134,8 @@ regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=
 
 }
 
-regionStats.AffymetrixCelSet <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL) {
+#regionStats.AffymetrixCelSet <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE) {
+setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE) {
 
   require(aroma.affymetrix)
 
@@ -173,9 +176,10 @@ regionStats.AffymetrixCelSet <- function(cs, design, fdrLevel=0.05, nPermutation
   ifelse( verbose, print(gc()), gc())
 
   return(.regionStats(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose, fdrProbes))
-}
+})
 
-regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
+#regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
+setMethodS3("regionStats","default",function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
   #nimblegen data
 
   # cut down on the amount of data read, if some rows of the design matrix are all zeros
@@ -186,5 +190,5 @@ regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutatio
   if( verbose )
     cat("Removing", sum(!w), "rows, due to NAs.\n")
   return(.regionStats(diffs, design, ch=gsub("chr","",ndf$chr), sp=ndf$position, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, verbose, fdrProbes))
-}
+})
 

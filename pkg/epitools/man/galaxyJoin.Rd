@@ -31,10 +31,6 @@ galaxyJoin(tabOrFile1 = NULL, tabOrFile2 = NULL, cols1 = 1:3, cols2 = 1:3, minco
 }
 \references{ ~put references to the literature/web site here ~ }
 \author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
- ~Make other sections like Warning with \section{Warning }{....} ~
-}
 \seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
