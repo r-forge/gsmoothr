@@ -27,10 +27,13 @@ loadPairFile <- function(filename, ndf) {
 
 loadSampleDirectory <- function(path, ndf, what="Cy3") {
 	#what="Cy3" or "Cy5" or "Cy3/Cy5" or "Cy5/Cy3"
-	if (!what %in% c("Cy3","Cy5","Cy3/Cy5","Cy5/Cy3")) stop('parameter "what" must be "Cy3", "Cy5", "Cy3/Cy5" or "Cy5/Cy3"')	
+	if (!what %in% c("Cy3","Cy5","Cy3/Cy5","Cy5/Cy3","Cy3andCy5","Cy5andCy3")) stop('parameter "what" must be "Cy3", "Cy5", "Cy3/Cy5", "Cy5/Cy3" or "Cy3andCy5"')	
 	files <- dir(path, pattern=".pair$")
 	samples <- unique(gsub("_532.pair|_635.pair","",files))
-	tempData <- matrix(NA, nrow=nrow(ndf), ncol=length(samples), dimnames=list(NULL, samples))
+        if (what=="Cy3andCy5") 
+          tempData <- matrix(NA, nrow=nrow(ndf), ncol=2*length(samples), dimnames=list(NULL, paste(rep(samples,2), rep(c("Cy3","Cy5"), each=length(samples)), sep="_")))
+        else
+          tempData <- matrix(NA, nrow=nrow(ndf), ncol=length(samples), dimnames=list(NULL, samples))
 	for (i in 1:length(samples)) {
 		if (what=="Cy3")
 		  tempData[,i] <- loadPairFile(paste(path,"/",samples[i],"_532.pair",sep=""), ndf)
@@ -38,8 +41,12 @@ loadSampleDirectory <- function(path, ndf, what="Cy3") {
 		  tempData[,i] <- loadPairFile(paste(path,"/",samples[i],"_635.pair",sep=""), ndf)
 		else if (what=="Cy3/Cy5")
 		  tempData[,i] <- loadPairFile(paste(path,"/",samples[i],"_532.pair",sep=""), ndf)-loadPairFile(paste(path,"/",samples[i],"_635.pair",sep=""), ndf)
-		else if (what=="Cy3/Cy5")
+		else if (what=="Cy5/Cy3")
 		  tempData[,i] <- loadPairFile(paste(path,"/",samples[i],"_635.pair",sep=""), ndf)-loadPairFile(paste(path,"/",samples[i],"_532.pair",sep=""), ndf)
+		else if (what=="Cy3andCy5") {
+		  tempData[,i] <- loadPairFile(paste(path,"/",samples[i],"_532.pair",sep=""), ndf) 
+                  tempData[,i+length(samples)] <- loadPairFile(paste(path,"/",samples[i],"_635.pair",sep=""), ndf)
+                }
 	}
 	return(tempData)
 }
