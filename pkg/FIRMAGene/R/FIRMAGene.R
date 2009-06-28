@@ -86,6 +86,6 @@ FIRMAGene <- function(object, nSamples=2000, seed=1976, cls=NULL, verbose=TRUE, 
     mufScoresZ[i,] <- (abs(mufScoresZ[i,])-mv[[nPch]][1])/mv[[nPch]][2]
   }
     
-  list(mufScores=mufScores,firmaGeneScores=mufScoresZ,nProbe=nProbe,nullDistributions=z,nProbeNull=v)
+  list(mufScores=mufScores,firmaGeneScores=mufScoresZ,nProbe=nProbe,nullDistributions=z,nProbeNull=v,plmObject=object,cls=cls)
 
 }
