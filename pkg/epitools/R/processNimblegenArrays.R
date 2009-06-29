@@ -1,5 +1,5 @@
 processNDF <- function(filename, ncols=768) {
-	ndfTemp <- read.table(filename, sep="\t", header=T, stringsAsFactors=F)
+	ndfTemp <- read.table(filename, sep="\t", header=TRUE, stringsAsFactors=FALSE, comment.char="")
 	#determine if reverse strand probe are marked by _RS or RS	
 	if (length(grep("_RS", ndfTemp$PROBE_ID))>0) rsSymbol = "_RS" else rsSymbol="RS"
 
@@ -13,14 +13,14 @@ processNDF <- function(filename, ncols=768) {
 	strand[grep(rsSymbol,ndfTemp$PROBE_ID)] = "-"
 
 	#return the GC content of each probe
-	GC <- sapply(ndfTemp$PROBE_SEQUENCE, function(x) {sum(strsplit(x,split="")[[1]] %in% c("C","G"))/nchar(x)}, USE.NAMES=F)
-	ndf <- data.frame(chr, position, strand, index=ndfTemp$Y*ncols+ndfTemp$X, sequence=ndfTemp$PROBE_SEQUENCE, GC, stringsAsFactors=F)
+	GC <- sapply(ndfTemp$PROBE_SEQUENCE, function(x) {sum(strsplit(x,split="")[[1]] %in% c("C","G"))/nchar(x)}, USE.NAMES=FALSE)
+	ndf <- data.frame(chr, position, strand, index=ndfTemp$Y*ncols+ndfTemp$X, sequence=ndfTemp$PROBE_SEQUENCE, GC, stringsAsFactors=FALSE)
 	ndf <- ndf[order(ndf$chr, ndf$position, ndf$strand),]
 	return(ndf)
 }
 
 loadPairFile <- function(filename, ndf, ncols=768) {
-	pairTemp <- read.table(filename, sep="\t", header=T, stringsAsFactors=F)
+	pairTemp <- read.table(filename, sep="\t", header=TRUE, stringsAsFactors=FALSE)
 	pairTemp$PM[pairTemp$PM==0] = 1
 	return(log2(pairTemp$PM[match(ndf$index,pairTemp$Y*ncols+pairTemp$X)]))
 }

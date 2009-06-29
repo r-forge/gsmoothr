@@ -1,4 +1,4 @@
-processAffyAnnotation <- function(csvFile, skip=19, ..., verbose=TRUE) {
+processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, ..., verbose=TRUE) {
 
   if (verbose)
     cat("Reading file:", csvFile,"\n")
@@ -28,9 +28,13 @@ processAffyAnnotation <- function(csvFile, skip=19, ..., verbose=TRUE) {
     cat("Parsing gene symbol.\n")
   g<-as.list(anno$gene_assignment)
   names(g)<-anno$probeset_id
-  h<-sapply(g,FUN=function(u) { s<-strsplit(u,split=" // ")[[1]]; ifelse(length(s)>1,s[2],s[1])})
-
+  h<-sapply(g,FUN=function(u) { s<-strsplit(u,split=" // ", fixed=TRUE)[[1]]; ifelse(length(s)>1,s[2],s[1])})
+  
   anno <- anno[,c("probeset_id","seqname","strand","start","stop","total_probes","category")]
-				  
-  data.frame(anno,symbol=h,type=ms)
+  if( getRefseq ) {
+    r<-sapply(g,FUN=function(u) strsplit(u,split=" // ", fixed=TRUE)[[1]][1])
+		data.frame(anno,id=r,symbol=h,type=ms)
+  } else {
+		data.frame(anno,symbol=h,type=ms)
+  }
 }
