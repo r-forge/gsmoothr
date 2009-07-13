@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Trimmed Mean Smoother}
 \description{
-
+A fast trimmed mean smoother (using C code) of data at discrete points (e.g. probe-level data).
 }
 \usage{
 tmeanC(sp, x, spout = NULL, nProbes = 10, probeWindow = 600, trim = 0.1) 
