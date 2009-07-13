@@ -22,15 +22,6 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
   int ii=0, jj=0, kk=0, lo, hi, st=0, en=0, n=*n_, np=*_np, pw=*_pw;
   double dummy[1000], sm=0., tr=*_tr;
 
-/*  
-  for (ii=0; ii< n; ii++)
-    printf("ii=%d data=%f smoothed=%f pos=%d\n", ii, x[ii], xs[ii], sp[ii]);
-  printf("probewindow=%d\n", pw);
-  printf("numprobes=%d\n", np);
-  printf("trim=%f\n", *tr);
-  printf("length=%d\n", n);
-*/
-
   for (ii=0; ii< n; ii++) {
   
 	/* find set of probes to use */
@@ -40,25 +31,15 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 	  en++;
 	if ((en-st+1) < np)
 	  continue;
-	
+  printf("ii=%d, st=%d, en=%d\n", ii, st, en);
+  	
 	/* assign current vector to dummy */
 	kk=0;
 	for(jj=st; jj <= en; jj++)
 	  dummy[kk++] = x[jj];
 	  
 	/* sort vector inline */
-	/*
-    printf("before sort:");
-	for (jj=0; jj< kk; jj++)
-      printf(" %f", dummy[jj]);
-    printf("\nafter sort:");
-	*/
 	R_rsort(dummy, kk);
-	/*
-	for (jj=0; jj< kk; jj++)
-      printf(" %f", dummy[jj]);
-    printf("\n");
-	*/
 
 	/* take mean of (internal portion) of dummy */
 	sm = 0.;
@@ -96,5 +77,59 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 #}
 # ------------------------	
 */
+
+}
+
+
+void tmeanPos(double *xi, double *xo, int *spi, int *spo, int *ni_, int *no_, double *_tr, int *_np, int *_pw)
+{
+
+/*
+  # xi  -- original probe-level score (input)
+  # xo  -- smoothed score (output)
+  # spi -- position to use for scoring (input)
+  # spo -- position to score for (output)
+  # ni_ -- length of input vectors
+  # no_ -- length of output vectors
+  # tr  -- amount of trim (0-0.49)
+  # np  -- (min) number of probes
+  # _pw -- probe window
+*/
+
+  int ii=0, jj=0, kk=0, lo, hi, st=0, en=0, ni=*ni_, no=*no_, np=*_np, pw=*_pw;
+  double dummy[1000], sm=0., tr=*_tr, xx;
+
+  for (ii=0; ii< no; ii++) {
+  
+	  /* find set of probes to use */
+    while( (spo[ii]-spi[st]) > pw )
+	    st++;
+    while( ((spi[en]-spo[ii]) < pw) && (en < (ni-1)) )
+	    en++;
+	  if ((en-st+1) < np)
+	    continue;
+    /*  printf("@@ ii=%d, st=%d, spo-spi=%d\n", ii, st, spo[ii]-spi[st]); */
+      	
+	  /* assign current vector to dummy */
+	  kk=0;
+	  for(jj=st; jj <= en; jj++)
+	    dummy[kk++] = xi[jj];
+	  
+    /* sort vector inline */
+	  R_rsort(dummy, kk);
+
+	  /* take mean of (internal portion) of dummy */
+	  sm = 0.;
+    lo = floor((float) kk * tr);
+    hi = kk-lo-1;
+ 	  for(jj=lo; jj <= hi; jj++)
+	    sm += dummy[jj];
+      
+    xx = sm/sqrt((float)(hi-lo+1));
+    printf("ii=%d, sp=%d, st=%d, en=%d, kk=%d, lo=%d, hi=%d, sm=%5.4f xx=%5.4f\n", ii, spo[ii], st, en, kk, lo, hi, sm, xx);
+	
+	  /* assign smoothed data */
+	  xo[ii] = sm/sqrt((float)(hi-lo+1));
+  }
 
 }

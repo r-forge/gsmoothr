@@ -1,53 +1,46 @@
 \name{tmeanC}
 \alias{tmeanC}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{Trimmed Mean Smoother}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+
 }
 \usage{
-tmeanC(sp, x, nProbes = 10, probeWindow = 600, trim = 0.1)
+tmeanC(sp, x, spout = NULL, nProbes = 10, probeWindow = 600, trim = 0.1) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{sp}{ ~~Describe \code{sp} here~~ }
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{nProbes}{ ~~Describe \code{nProbes} here~~ }
-  \item{probeWindow}{ ~~Describe \code{probeWindow} here~~ }
-  \item{trim}{ ~~Describe \code{trim} here~~ }
+  \item{sp}{numeric vector of positions (x-values)}
+  \item{x}{numeric vector of data (corresponding to \code{sp}}
+  \item{spout}{optional vector of output values to calculate trimmed mean at, default: NULL}
+  \item{nProbes}{minimum number of observations required within window}
+  \item{probeWindow}{distance (in x) in each direction to look for observations to be used in the trimmed mean}
+  \item{trim}{proportion of trim to use in trimmed mean}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+Using the specified probe window, this procedure uses all values within the window and calculates a trimmed mean with the specified amount of trim.  If there are not enough observations within the window at a given position (as given by \code{nProbes}), a zero is returned.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  vector (of the same length as \code{sp} (or \code{spout})) giving the trimmed mean smoothed values
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
- ~Make other sections like Warning with \section{Warning }{....} ~
-}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Mark Robinson}
+\seealso{\code{\link{trimmedMean}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (sp, x, nProbes = 10, probeWindow = 600, trim = 0.1) 
-{
-    n <- length(x)
-    stopifnot(length(x) == length(sp))
-    out <- .C("tmean", x = as.double(x), xs = double(n), sp = as.integer(sp), 
-        n = as.integer(n), tr = as.double(trim), np = as.integer(nProbes), 
-        pw = as.integer(probeWindow), PACKAGE = "epitools")
-    out$xs
-  }
+sp <- seq(100, 1000, by=100)
+ss <- seq(100,1000, by=50)
+set.seed(14)
+x <- rnorm(length(sp))
+
+tmC <- tmeanC(sp, x, probeWindow=300, nProbes=5)
+tmC1 <- tmeanC(sp, x, spout=sp, probeWindow=300, nProbes=5)
+tmC2 <- tmeanC(sp, x, spout=ss, probeWindow=300, nProbes=5)
+
+cbind(tmC,tmC1)
+
+plot(sp, x, type="h", ylim=c(-2,2))
+lines(sp, tmC1, col="blue")
+lines(ss, tmC2, col="red")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
