@@ -56,7 +56,7 @@ regionStats <- function(...) UseMethod("regionStats")
   
 
   fdrTable <- function(realScore, permScore, chrV, minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE ), cutsLength=100, nProbes = 10, verbose=TRUE, fdrProbes = FALSE, ...) {
-
+    require(gsmoothr)
     cuts <- seq(minCutoff,maxCutoff,length=cutsLength)
 
     fdr <- matrix(,nr=length(cuts),nc=4)
@@ -94,7 +94,7 @@ regionStats <- function(...) UseMethod("regionStats")
 	  w <- which(ch == uch[ii])
       #tmeanReal[w,col] <- trimmedMean(sp[w], diffs[w,col], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
 	  
-	  tmeanReal[w,col] <- tmeanC(sp[w], diffs[w,col], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
+	  tmeanReal[w,col] <- gsmoothr::tmeanC(sp[w], diffs[w,col], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
   	  if( verbose )
 	      cat("R")
 	  for(j in 1:ncol(tmeanPerms[[col]])) {
@@ -102,7 +102,7 @@ regionStats <- function(...) UseMethod("regionStats")
 	    #tmeanPerms[[col]][w,j] <- trimmedMean(sp[w], diffs[s,col][w], probeWindow=probeWindow, meanTrim=meanTrim, nProbes=nProbes)
 		#return(list(s=s, diffs=diffs, col=col, sp=sp, w=w))
 		#save(diffs,s,col,w,sp,j,file="preERROR.Rdata")
-	    tmeanPerms[[col]][w,j] <- tmeanC(sp[w], diffs[s,col][w], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
+	    tmeanPerms[[col]][w,j] <- gsmoothr::tmeanC(sp[w], diffs[s,col][w], probeWindow=probeWindow, trim=meanTrim, nProbes=nProbes)
 		if( verbose )
 	      cat(".")
 
