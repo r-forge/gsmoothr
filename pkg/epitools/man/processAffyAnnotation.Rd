@@ -6,12 +6,13 @@
   ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-processAffyAnnotation(csvFile, skip = 19, ..., verbose = TRUE)
+processAffyAnnotation(csvFile, skip = 19, getRefseq = FALSE, ..., verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{csvFile}{ ~~Describe \code{csvFile} here~~ }
   \item{skip}{ ~~Describe \code{skip} here~~ }
+  \item{getRefseq}{ ~~Describe \code{getRefseq} here~~ }
   \item{\dots}{ ~~Describe \code{\dots} here~~ }
   \item{verbose}{ ~~Describe \code{verbose} here~~ }
 }

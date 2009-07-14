@@ -6,13 +6,14 @@
   ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-loadSampleDirectory(path, ndf, what="Cy3")
+loadSampleDirectory(path, ndf, what="Cy3", ncols = 768)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{path}{ ~~Describe \code{path} here~~ }
   \item{ndf}{ ~~Describe \code{ndf} here~~ }
   \item{what}{ ~~Describe \code{what} here~~ }
+  \item{ncols}{ ~~Describe \code{ncols} here~~ }
 }
 \details{
   ~~ If necessary, more details than the description above ~~

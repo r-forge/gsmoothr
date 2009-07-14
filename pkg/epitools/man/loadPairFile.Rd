@@ -6,12 +6,13 @@
   ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-loadPairFile(filename, ndf)
+loadPairFile(filename, ndf, ncols = 768)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filename}{ ~~Describe \code{filename} here~~ }
   \item{ndf}{ ~~Describe \code{ndf} here~~ }
+  \item{ncols}{ ~~Describe \code{ncols} here~~ }
 }
 \details{
   ~~ If necessary, more details than the description above ~~

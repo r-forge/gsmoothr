@@ -1,6 +1,6 @@
 #regionStats <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE, ...) UseMethod("regionStats")
 
-regionStats <- function(...) UseMethod("regionStats")
+#regionStats <- function(...) UseMethod("regionStats")
 
 .regionStats<- function(diffs, design, ch, sp, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes = FALSE) {
   getBed <- function(scoreV, chrV, posV, cut=NULL, nProbes=10, indexExtend=0, ...) {
