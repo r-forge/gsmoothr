@@ -31,7 +31,7 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 	  en++;
 	if ((en-st+1) < np)
 	  continue;
-  printf("ii=%d, st=%d, en=%d\n", ii, st, en);
+  /*printf("ii=%d, st=%d, en=%d\n", ii, st, en);*/
   	
 	/* assign current vector to dummy */
 	kk=0;
@@ -126,7 +126,7 @@ void tmeanPos(double *xi, double *xo, int *spi, int *spo, int *ni_, int *no_, do
 	    sm += dummy[jj];
       
     xx = sm/sqrt((float)(hi-lo+1));
-    printf("ii=%d, sp=%d, st=%d, en=%d, kk=%d, lo=%d, hi=%d, sm=%5.4f xx=%5.4f\n", ii, spo[ii], st, en, kk, lo, hi, sm, xx);
+    /*printf("ii=%d, sp=%d, st=%d, en=%d, kk=%d, lo=%d, hi=%d, sm=%5.4f xx=%5.4f\n", ii, spo[ii], st, en, kk, lo, hi, sm, xx);*/
 	
 	  /* assign smoothed data */
 	  xo[ii] = sm/sqrt((float)(hi-lo+1));

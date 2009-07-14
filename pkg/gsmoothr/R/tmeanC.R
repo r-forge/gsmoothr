@@ -18,7 +18,7 @@ tmeanC <- function(sp, x, spout=NULL, nProbes=10, probeWindow=600, trim=0.1) {
     out<-.C("tmeanPos", xi=as.double(x[k]), xo=double(no), spi=as.integer(sp[k]), spo=as.integer(spout), 
                         ni=as.integer(ni), no=as.integer(no), tr=as.double(trim), np=as.integer(nProbes), 
                         pw=as.integer(probeWindow), PACKAGE="gsmoothr")
-    outx[k] <- out$xo
+    outx <- out$xo
   }
 
   outx
