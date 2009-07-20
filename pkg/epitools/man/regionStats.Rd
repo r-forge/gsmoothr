@@ -1,58 +1,46 @@
-\name{regionStats}
+\name{regionStats} 
 \Rdversion{1.1}
 \alias{regionStats}
 \alias{regionStats.AffymetrixCelSet}
 \alias{regionStats.default}
 \alias{regionStats,AffymetrixCelSet-method}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{calculate statistics and find regions}
+
+\title{Find Regions of High MAT Scores}
 \description{
-Using design matrix, input data, forms a score and finds extreme values of it at a given FDR. 
+The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is calculated as the ratio of the number of significant regions found in a premutation-based test, to the number found in the actual experimental microarray data. The function then finds regions that have a number of probes above a pre-specified number, in regions of the genome, of a certain size.
 }
 \usage{
-regionStats(...)
+\method{regionStats}{default}
+
+\method{regionStats}{AffymetrixCelSet}
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+  \item{A set of raw microarray intensity data files}{}
+  \item{design}{A design matrix of how to manipulate }
+  \item{fdrLevel}{Cutoff of the maximum acceptable FDR}
+  \item{nPermutations}{Number of permutations to use }
+  \item{probeWindow}{Size of window, in base pairs, to check for }
+  \item{meanTrim}{A number representing the top and bottom fraction of ordered values in a window to be removed, before the window mean is calculated.}
+  \item{nProbes}{Minimum number of probes in a window, for the region to qualify as a region of significance.}
+  \item{verbose}{Print debugging comments while executing.} 
+  \item{ind}{A vector of the positions of the probes on the array}
+  \item{fdrProbes}{If TRUE, a count of the number of probes in all significant regions is calculated.}
+  \item{ndf}{The Nimblegen Definition File for Nimblegen array data.}
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+\details{}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+	\item{chr}{Chromosome number that the region is on.}
+	\item{start}{Number of the base pair where the region starts. The number is from the start of the particular chromosome the region is on.}
+	\item{end}{Number of the nucelotide where the region ends. The number is from the start of the particular chromosome the region is on.}
+	\item{score}{MAT score of the region.}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
+\references{}
+\author{Mark Robinson}
+\note{}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+\seealso{}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (cs, design, fdrLevel = 0.05, nPermutations = 5, probeWindow = 600, 
-    meanTrim = 0.1, nProbes = 10, verbose = TRUE, fdrProbes = FALSE, 
-    ...) 
+function (cs, design, fdrLevel = 0.05, nPermutations = 5, probeWindow = 600, meanTrim = 0.1, nProbes = 10, verbose = TRUE, fdrProbes = FALSE, ...) 
 UseMethod("regionStats")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
