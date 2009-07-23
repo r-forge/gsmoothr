@@ -1,46 +1,37 @@
 \name{loadPairFile}
 \alias{loadPairFile}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{A routine to read Nimblegen tiling array intensities}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+Reads a file in Nimblegen pair format, returning log2 intensities of probes referenced by the supplied ndf data frame.
 }
 \usage{
 loadPairFile(filename, ndf, ncols = 768)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{filename}{ ~~Describe \code{filename} here~~ }
-  \item{ndf}{ ~~Describe \code{ndf} here~~ }
-  \item{ncols}{ ~~Describe \code{ncols} here~~ }
+  \item{filename}{the name of the pair file which intensities are to be read from.}
+  \item{ndf}{a data frame produced by \code{\link{processNDF}}.}
+  \item{ncols}{the number of columns of probes on the array - must be the same value as used in \code{processNDF}. The default works for 385K format arrays.}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+Reads in intensities from the specified pair file, then matches probes against those specified in the supplied ndf.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  a \code{vector} of log2 intensities, the number of rows of the supplied \code{ndf} in length.
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Aaron Statham}
+\seealso{\code{\link{loadSampleDirectory}} for reading multiple pair files with the same ndf. \code{\link{processNDF}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (filename, ndf) 
-{
-    pairTemp <- read.table(filename, sep = "\t", header = T, 
-        stringsAsFactors = F)
-    pairTemp$PM[pairTemp$PM == 0] = 1
-    return(log2(pairTemp$PM[match(ndf$index, pairTemp$Y * 768 + 
-        pairTemp$X)]))
-  }
+# Not run
+#
+## Read in the NDF file 
+# ndfAll <- processNDF("080310_HG18_chr7RSFS_AS_ChIP.ndf")
+#
+## Subset the NDF to only probes against chromosomes
+# ndf <- ndfAll[grep("^chr", ndfAll$chr),]
+#
+## Read in a pair file using the chromosome only NDF
+# arrayIntensity <- loadPairFile("Pairs/Array1_532.pair", ndf)
+#
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.

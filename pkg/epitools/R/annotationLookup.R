@@ -1,6 +1,6 @@
 annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 #probes = dataframe of $chr, $position and $strand ("+" or "-")
-#annotation = dataframe of $chr, $start, $end, $strand ("+" or "-") and $name
+#annotation = dataframe of $chr, $start, $end, $strand ("+" or "-") and $name or rownames = annotation name
 
 	processChunk <- function(probePositions, annotation) {
 		#initialise return variables
@@ -48,6 +48,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 		probesStrandChr <- probes$chr
 		annotationStrandChr <- annotation$chr
 	} else { #create separate plus & minus chromosomes
+		if (is.null(probes$strand)) stop("error: if 'annotation' contains strand information, 'probes' must contain strand information as well")
 		probesStrandChr <- paste(probes$chr, probes$strand, sep="")
 		annotationStrandChr <- paste(annotation$chr, annotation$strand, sep="")
 	}
@@ -81,7 +82,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 
 annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) {
 #probes = dataframe of $chr and $position
-#annotation = dataframe of $chr, $position, $strand ("+" or "-"), rownames = annotation name
+#annotation = dataframe of $chr, $position, $strand ("+" or "-") and $name or rownames = annotation name
 	annotationTemp <- data.frame(chr=annotation$chr, 
                                      start=annotation$position+ifelse(annotation$strand=="+",-bpUp, +bpUp),
                                      end=annotation$position+ifelse(annotation$strand=="+",+bpDown, -bpDown),
@@ -94,6 +95,10 @@ annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) 
 	}
 #	annot$offsets = mapply(adjustOffset, annot$offsets, annotation$strand, MoreArgs=list(bpUp=bpUp, bpDown=bpDown))
 	annot$offsets = lapply(annot$offsets, function(x,bpUp) {return(x-bpUp-1)}, bpUp)
+	if (!is.null(rownames(annotation))) {
+		names(annot$indexes) <- annotation$name
+		names(annot$offsets) <- annotation$name
+	}
 	return(annot)
 }
 

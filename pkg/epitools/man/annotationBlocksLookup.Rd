@@ -1,112 +1,34 @@
 \name{annotationBlocksLookup}
 \alias{annotationBlocksLookup}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{Forms a mapping between probe locations and chromosomal blocks (regions)}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+Starting from a table of genome locations for probes (see \code{probes} below) and a table of regions of interest (see \code{annotation} below), this procedure forms a list structure that contains the indices to map from one to the other.
 }
 \usage{
 annotationBlocksLookup(probes, annotation, probeIndex = NULL)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{probes}{ ~~Describe \code{probes} here~~ }
-  \item{annotation}{ ~~Describe \code{annotation} here~~ }
-  \item{probeIndex}{ ~~Describe \code{probeIndex} here~~ }
+  \item{probes}{probe genomic locations, a \code{data.frame} with required elements \code{chr} (character) and \code{position} (integer) and optional element \code{strand} ("+" or "-")}
+  \item{annotation}{a \code{data.frame} with required elements \code{chr} (character),  \code{start} (integer), \code{end} (integer) and optional elements \code{strand} ("+" or "-") and \code{name} (character)}
+  \item{probeIndex}{a probe index, default \code{NULL}}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+Strandedness is dealt with as follows: If \code{annotation} contains \code{strand} information, \code{probes} must contain \code{strand} information as well. If \code{annotation} does not contain \code{strand} information, strandedness is ignored even if \code{probes} contains strand information. For memory efficiency, the actual mapping between probes is done in chunks of 10 megabases.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  A list with elements
+  \item{indexes}{a list for each row in \code{annotation} table, giving a vector of indices to the probe table}
+  \item{offsets}{a list for each row in \code{annotation} table, giving a vector (corresponding to \code{indexes}) of offsets (from the beginning of the annotation block) for each probe}
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Aaron Statham, Mark Robinson}
+\seealso{\code{\link{annotationLookup}} which simplifies annotation lookups for constant sized regions}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# create example set of probes and gene start sites
+probeTab <- data.frame(position=seq(1000,3000,by=200), chr="chrX", strand="+")
+geneExons <- data.frame(chr="chrX", start=c(2100,2200), end=c(2500, 2400), strand=c("+","-"))
+rownames(geneExons) <- paste("gene",1:2,sep="")
 
-## The function is currently defined as
-function (probes, annotation, probeIndex = NULL) 
-{
-    processChunk <- function(probePositions, annotation) {
-        numAnnot = nrow(annotation)
-        annotProbes = list(indexes = vector(mode = "list", length = numAnnot), 
-            offsets = vector(mode = "list", length = numAnnot))
-        if (is.null(probePositions) || (length(probePositions) == 
-            0)) 
-            return(annotProbes)
-        chromosomeSize = max(probePositions)
-        chromosomeLookup <- rep.int(NA, chromosomeSize)
-        chromosomeLookup[probePositions] = names(probePositions)
-        for (i in 1:numAnnot) {
-            tempProbes = chromosomeLookup[annotation$start[i]:annotation$end[i]]
-            annotProbes$indexes[[i]] = as.integer(na.omit(tempProbes))
-            annotProbes$offsets[[i]] = which(!is.na(tempProbes))
-        }
-        return(annotProbes)
-    }
-    processChromosome <- function(probePositions, annotation) {
-        numAnnot = nrow(annotation)
-        annotProbes = list(indexes = vector(mode = "list", length = numAnnot), 
-            offsets = vector(mode = "list", length = numAnnot))
-        if (length(probePositions) == 0) 
-            return(annotProbes)
-        chromosomeSize = max(probePositions)
-        annotChunks = split(1:nrow(annotation), trunc(annotation$start/1e+07))
-        for (i in annotChunks) {
-            chunkRange = range(c(annotation$start[i], annotation$end[i]))
-            chunkPositions = probePositions[(probePositions >= 
-                chunkRange[1]) & (probePositions <= chunkRange[2])] - 
-                chunkRange[1] + 1
-            chunkAnnot = annotation[i, ]
-            chunkAnnot$start = chunkAnnot$start - chunkRange[1] + 
-                1
-            chunkAnnot$end = chunkAnnot$end - chunkRange[1] + 
-                1
-            tempAnnot = processChunk(chunkPositions, chunkAnnot)
-            annotProbes$indexes[i] = tempAnnot$indexes
-            annotProbes$offsets[i] = tempAnnot$offsets
-        }
-        return(annotProbes)
-    }
-    if (is.null(annotation$strand)) {
-        probesStrandChr <- probes$chr
-        annotationStrandChr <- annotation$chr
-    }
-    else {
-        probesStrandChr <- paste(probes$chr, probes$strand, sep = "")
-        annotationStrandChr <- paste(annotation$chr, annotation$strand, 
-            sep = "")
-    }
-    annotChr = split(1:nrow(annotation), annotationStrandChr)
-    annot = list(indexes = vector(mode = "list", length = nrow(annotation)), 
-        offsets = vector(mode = "list", length = nrow(annotation)))
-    for (i in annotChr) {
-        thisChr = annotationStrandChr[i[1]]
-        cat("Processing", thisChr, "\n")
-        tempIndex = which(probesStrandChr == thisChr)
-        tempProbes = probes$position[tempIndex]
-        if (is.null(probeIndex)) 
-            names(tempProbes) <- tempIndex
-        else names(tempProbes) <- probeIndex[tempIndex]
-        tempAnnot = processChromosome(tempProbes, annotation[i, 
-            ])
-        annot$indexes[i] = tempAnnot$indexes
-        annot$offsets[i] = tempAnnot$offsets
-    }
-    if (!is.null(rownames(annotation))) {
-        names(annot$indexes) <- annotation$name
-        names(annot$offsets) <- annotation$name
-    }
-    return(annot)
-  }
+# Call annotationLookup() and look at output
+aBL <- annotationBlocksLookup(probeTab, geneExons)
+print(aBL)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.

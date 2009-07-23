@@ -1,55 +1,37 @@
 \name{processNDF}
 \alias{processNDF}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{Reads in a Nimblegen microarray design file (NDF)}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+
 }
 \usage{
 processNDF(filename, ncols = 768)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{filename}{ ~~Describe \code{filename} here~~ }
-  \item{ncols}{ ~~Describe \code{ncols} here~~ }
+  \item{filename}{the name of the Nimblegen microarray design file}
+  \item{ncols}{the number of columns of probes on the array - must be the same value as will be passed to \code{loadPairFile} or \code{loadSampleDirectory}. The default works for 385K format arrays.}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+Reads in a Nimblegen microarray design file. This enables the reading in and annotation of Nimblegen microarray data files (pair files).
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+a data frame containing 
+\item{chr}{the chromosome the probe was designed against}
+\item{position}{the position of the sequence the probe was designed against (probe centre)}
+\item{strand}{the strand the probe was designed against}
+\item{index}{the index (x y position) the probe occupies on the array}
+\item{sequence}{the actual DNA sequence synthesised onto the array}
+\item{GC}{the %GC content of the probe sequence}
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Aaron Statham}
+\seealso{\code{\link{loadSampleDirectory}}, \code{\link{loadPairFile}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (filename) 
-{
-    ndfTemp <- read.table(filename, sep = "\t", header = T, stringsAsFactors = F)
-    chr <- gsub("FS.*|_RS.*", "", ndfTemp$PROBE_ID)
-    chr <- gsub("CHR", "chr", chr)
-    chr <- gsub("chr0", "chr", chr)
-    position <- ndfTemp$POSITION + trunc(nchar(ndfTemp$PROBE_SEQUENCE)/2)
-    strand <- rep("+", nrow(ndfTemp))
-    strand[grep("_RS", ndfTemp$PROBE_ID)] = "-"
-    GC <- sapply(ndfTemp$PROBE_SEQUENCE, function(x) {
-        sum(strsplit(x, split = "")[[1]] \%in\% c("C", "G"))/nchar(x)
-    }, USE.NAMES = F)
-    ndf <- data.frame(chr, position, strand, index = ndfTemp$Y * 
-        768 + ndfTemp$X, sequence = ndfTemp$PROBE_SEQUENCE, GC, 
-        stringsAsFactors = F)
-    ndf <- ndf[order(ndf$chr, ndf$position, ndf$strand), ]
-    return(ndf)
-  }
+# Not run
+#
+## Read in the NDF file 
+# ndfAll <- processNDF("080310_HG18_chr7RSFS_AS_ChIP.ndf")
+#
+## Subset the NDF to only probes against chromosomes
+# ndf <- ndfAll[grep("^chr", ndfAll$chr),]
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+

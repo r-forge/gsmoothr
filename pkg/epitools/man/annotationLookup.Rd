@@ -1,6 +1,6 @@
 \name{annotationLookup}
 \alias{annotationLookup}
-\title{Forms a mapping between promoter locations (e.g. probes on a tiling array) and transcription starts sites (TSS) of a gene}
+\title{Forms a mapping between probes on a tiling array and regions of a fixed size around chromosomal co-ordinates}
 \description{
 Starting from a table of genome locations for probes (see \code{probes} below) and a table of TSSs for genes (see \code{annotation} below), this procedure forms a list structure that contains the indices to map from one to the other.
 }
@@ -9,14 +9,14 @@ annotationLookup(probes, annotation, bpUp, bpDown, probeIndex = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{probes}{probe genomic locations, a \code{data.frame} with required elements \code{chr} and \code{position}}
-  \item{annotation}{gene start sites, a \code{data.frame} with required elements }
+  \item{probes}{probe genomic locations, a \code{data.frame} with required elements \code{chr} (character) and \code{position} (integer)}
+  \item{annotation}{a \code{data.frame} with required elements \code{chr} (character) and \code{position} (integer) and optional elements \code{strand} ("+" or "-") and \code{name} (character)}
   \item{bpUp}{The number of bases upstream to look}
   \item{bpDown}{The number of bases downstream to look}
   \item{probeIndex}{a probe index, default \code{NULL}}
 }
 \details{
-For memory efficiency, the actual mapping between probes is done
+This function is a wrapper for the generic function \code{annotationBlocksLookup} which can handle annotations of varying sizes. \code{annotationLookup} is appropriate where you wish to map probes that are within a fixed distance of points of annotation e.g gene transcription start sites.
 }
 \value{
   A list with elements
@@ -24,7 +24,7 @@ For memory efficiency, the actual mapping between probes is done
   \item{offsets}{a list for each gene in \code{annotation} table, giving a vector (corresponding to \code{indexes}) of offsets (to the TSS) for each probe}
 }
 \author{Aaron Statham, Mark Robinson}
-\seealso{\code{\link{makeWindowLookupTable}}, ~~~ }
+\seealso{\code{\link{annotationBlocksLookup}}, \code{\link{makeWindowLookupTable}}}
 \examples{
 
 # create example set of probes and gene start sites
