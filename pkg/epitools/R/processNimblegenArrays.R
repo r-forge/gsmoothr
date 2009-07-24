@@ -57,5 +57,3 @@ loadSampleDirectory <- function(path, ndf, what="Cy3", ncols=768) {
 	}
 	return(tempData)
 }
-
-
