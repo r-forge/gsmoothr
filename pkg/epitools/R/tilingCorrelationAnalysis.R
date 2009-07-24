@@ -1,4 +1,4 @@
-makeWindowLookupList <- function(indexes, offsets, starts, ends) {
+.makeWindowLookupList <- function(indexes, offsets, starts, ends) {
 
 	getProbesInWindow <- function(indexes, offsets, start, end) {
 	#indexes & offsets are integer vectors at this stage
@@ -52,7 +52,7 @@ makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
 }
 
 
-scoreCorrelation <- function(lookup, intensities, correlateTo, minProbes=1, cor.method="pearson") {
+.scoreCorrelation <- function(lookup, intensities, correlateTo, minProbes=1, cor.method="pearson") {
 	windowMeans <- function(indexes, intensities) {
 		return(mean(intensities[indexes]))
 	}
@@ -62,7 +62,7 @@ scoreCorrelation <- function(lookup, intensities, correlateTo, minProbes=1, cor.
 }
 
 
-scoreIntensity <- function(lookup, intensities, minProbes=1, removeZeros=FALSE, returnMatrix=FALSE) {
+.scoreIntensity <- function(lookup, intensities, minProbes=1, removeZeros=FALSE, returnMatrix=FALSE) {
 	windowMeans <- function(indexes, intensities) {
 	    x <- intensities[indexes]
 		if(removeZeros)

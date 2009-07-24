@@ -1,4 +1,4 @@
-processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, ..., verbose=TRUE) {
+processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, verbose=TRUE) {
 
   if (verbose)
     cat("Reading file:", csvFile,"\n")

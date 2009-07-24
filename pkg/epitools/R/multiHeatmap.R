@@ -1,4 +1,4 @@
-makeBreaks<-function(u,n=100) {
+.makeBreaks<-function(u,n=100) {
   require(gplots)
   #if (ncol(u) == 4) {
   #  q<-quantile(as.numeric(u),p=c(.05,.95),na.rm=TRUE)

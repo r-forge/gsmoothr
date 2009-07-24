@@ -21,7 +21,7 @@ a data frame containing
 \item{strand}{the strand the probe was designed against}
 \item{index}{the index (x y position) the probe occupies on the array}
 \item{sequence}{the actual DNA sequence synthesised onto the array}
-\item{GC}{the %GC content of the probe sequence}
+\item{GC}{the percent GC content of the probe sequence}
 }
 \author{Aaron Statham}
 \seealso{\code{\link{loadSampleDirectory}}, \code{\link{loadPairFile}}}

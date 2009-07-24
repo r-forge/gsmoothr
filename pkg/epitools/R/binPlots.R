@@ -57,10 +57,10 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	  cat(lev," ")
       for(i in 1:ncol(dataMatrix)) {
         if( plotType %in% c("line","heatmap")) {
-          intensScores[i,,j,k] <- scoreIntensity(lookupTable[breakList[[k]]==lev,], intensities=dataMatrix[,i], 
+          intensScores[i,,j,k] <- .scoreIntensity(lookupTable[breakList[[k]]==lev,], intensities=dataMatrix[,i], 
 		                                         minProbes=2, removeZeros=TRUE)
 		} else {
-          d <- scoreIntensity(lookupTable[breakList[[k]]==lev,], intensities=dataMatrix[,i], 
+          d <- .scoreIntensity(lookupTable[breakList[[k]]==lev,], intensities=dataMatrix[,i], 
 		       minProbes=2, returnMatrix=TRUE,removeZeros=TRUE)
 		  
           intensScores[[i]][[k]][[j]] <- boxplot(as.data.frame(d), plot=FALSE)
