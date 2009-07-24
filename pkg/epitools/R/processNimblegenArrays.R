@@ -1,5 +1,9 @@
 processNDF <- function(filename, ncols=768) {
 	ndfTemp <- read.table(filename, sep="\t", header=TRUE, stringsAsFactors=FALSE, comment.char="")
+	uniqueNDFRows <- unique(ndfTemp$PROBE_ID)
+	firstIndicesOfUniqueNDFRows <- match(uniqueNDFRows, ndfTemp$PROBE_ID)
+	ndfTemp <- ndfTemp[firstIndicesOfUniqueNDFRows, ]
+
 	#determine if reverse strand probe are marked by _RS or RS	
 	if (length(grep("_RS", ndfTemp$PROBE_ID))>0) rsSymbol = "_RS" else rsSymbol="RS"
 
