@@ -16,7 +16,7 @@ The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{A set of raw microarray intensity data files}{}
+  \item{cs}{A set of raw microarray intensity data files}
   \item{design}{A design matrix of how to manipulate }
   \item{fdrLevel}{Cutoff of the maximum acceptable FDR}
   \item{nPermutations}{Number of permutations to use }
