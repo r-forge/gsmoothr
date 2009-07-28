@@ -92,7 +92,7 @@ makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
 #Draw graph of correlation vs distance from TSS
 correlationGraphs <- function(intensities, lookup, compareExpression, ...) {
 	corScores = matrix(NA, nrow=ncol(intensities), ncol=length(lookup), dimnames=list(colnames(intensities),names(lookup)))
-	for (i in 1:ncol(intensities)) corScores[i,] = sapply(lookup, scoreCorrelation, intensities[,i], compareExpression, minProbes=2)
+	for (i in 1:ncol(intensities)) corScores[i,] = sapply(lookup, .scoreCorrelation, intensities[,i], compareExpression, minProbes=2)
 
 	cols = rainbow(nrow(corScores))
 	plot(0, type="n", xlim=c(-7500,2500), ylim=c(-1,1), xlab="Distance from TSS", ylab="Correlation with Expression", ...)
