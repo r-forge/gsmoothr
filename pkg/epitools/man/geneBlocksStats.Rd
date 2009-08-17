@@ -20,7 +20,7 @@ For each region of interested explicitly specified, this routine interrogates pr
   \item{robust}{logical, whether to use a robust test when fitting}
   \item{minNRobust}{minimum number of probes to use}
   \item{adjustMethod}{method used to p-values for multiple testing}
-  \item{regionsOfInterestTable}{A \code{data.frame} with elements \code{chr} (character, \code{position} (integer), \code{strand} ("+" or "-"), and \code{name}(character)}
+  \item{regionsOfInterestTable}{A \code{data.frame} with elements \code{chr} (character), \code{start} (integer), \code{end} (integer), \code{strand} ("+" or "-"), and \code{name}(character)}
   \item{...}{Arguments passed to internal function for statistics calculations}
 }
 \details{
