@@ -1,4 +1,4 @@
-.genePromoterStats <- function(cs, geneCoords, design, ind, upStream, downStream, annot, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr")
+.genePromoterStats <- function(cs, geneCoords, design, ind, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot)
 {
   # cut down on the amount of data read, if some rows of the design matrix are all zeros
   w <- which( rowSums(design != 0) > 0 )
@@ -84,7 +84,7 @@ setMethodS3("genePromoterStats", "AffymetrixCelSet", function(cs, geneCoords, de
 		probePositions <- probePositions[pb,]
 		annot <- annotationLookup(probePositions, genePositions, upS, dnS)
 	
-	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, annot, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr"))
+	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
   
 }
 )
@@ -123,6 +123,6 @@ setMethodS3("genePromoterStats", "default", function(cs, ndf, geneCoords, design
     # saving objects to disk
     saveObject(annot, file=paste("annot.up",upS,".dn",dnS,".Rdata", sep=""))
 
-	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr"))
+	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
   }
 )
