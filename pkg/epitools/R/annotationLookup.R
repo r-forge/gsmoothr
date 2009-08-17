@@ -83,6 +83,8 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) {
 #probes = dataframe of $chr and $position
 #annotation = dataframe of $chr, $position, $strand ("+" or "-") and $name or rownames = annotation name
+#if annotation has no strand, assume are + strand
+	if (is.null(annotation$strand)) annotation$strand <- "+"
 	annotationTemp <- data.frame(chr=annotation$chr, 
                                      start=annotation$position+ifelse(annotation$strand=="+",-bpUp, +bpUp),
                                      end=annotation$position+ifelse(annotation$strand=="+",+bpDown, -bpDown),
