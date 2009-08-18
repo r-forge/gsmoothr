@@ -70,7 +70,7 @@ setMethodS3("geneBlocksStats", "AffymetrixCelSet", function(cs, design, verbose=
 setMethodS3("geneBlocksStats", "default", function(cs, ndf, design, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, ...)
 {
 
-	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, stringsAsFactors=FALSE)	
+	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)	
   
   if( nrow(design) != ncol(cs) )
     stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
