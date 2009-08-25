@@ -38,7 +38,7 @@
   if( ncol(xDf)==5 )
     colnames(xDf)[2:5] <- paste(c("meandiff","tstats","pvals","adjpvals"), gsub(".[1-9]$","",colnames(xDf)[2:5]), sep=".")
   
-    write.csv(cbind(regionsOfInterestTable, xDf), file="blocksStats.csv")
+    write.csv(cbind(regionsOfInterestTable, xDf))
 }
 
 setMethodS3("geneBlocksStats", "AffymetrixCelSet", function(cs, design, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, ...)
