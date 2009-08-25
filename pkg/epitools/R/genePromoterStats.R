@@ -1,11 +1,5 @@
 .genePromoterStats <- function(cs, geneCoords, design, ind, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot)
 {
-  # cut down on the amount of data read, if some rows of the design matrix are all zeros
-  w <- which( rowSums(design != 0) > 0 )
-  cs <- extract(cs,w, verbose=verbose)
-  dmP <- log2(extractMatrix(cs,cells=ind,verbose=verbose))
-  
-  diffs <- dmP %*% design[w,]
   means <- tstats <- matrix(NA, nr=nrow(geneCoords), nc=ncol(diffs), dimnames=list(NULL,colnames(design)))
   df <- rep(0,nrow(geneCoords))
 
@@ -62,6 +56,9 @@ setMethodS3("genePromoterStats", "AffymetrixCelSet", function(cs, geneCoords, de
   
   if( nrow(design) != nbrOfArrays(cs) )
     stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
+	
+	w <- which( rowSums(design != 0) > 0 )
+	cs <- extract(cs,w, verbose=verbose)
 
 	
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
@@ -77,7 +74,10 @@ setMethodS3("genePromoterStats", "AffymetrixCelSet", function(cs, geneCoords, de
 		# will have to change this later ... standardize column names of this table ("seqname","probeset_id")
 		genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, 
 									row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
-										
+	
+	  dmP <- log2(extractMatrix(cs,cells=ind,verbose=verbose))
+	  diffs <- dmP %*% design[w,]									
+																												
 		# run lookup twice.  first to get a list of smaller list of probes to use
 		annot <- annotationLookup(probePositions, genePositions, upS, dnS)
 		pb <- unique(unlist(annot$indexes, use.names=FALSE))
