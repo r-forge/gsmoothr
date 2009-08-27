@@ -1,4 +1,4 @@
-.geneBlocksStats <- function(cs, design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot)
+.geneBlocksStats <- function(design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot)
 {
   means <- tstats <- matrix(NA, nr=nrow(regionsOfInterestTable), nc=ncol(diffs), dimnames=list(NULL,colnames(design)))
   df <- rep(0,nrow(regionsOfInterestTable))
@@ -62,7 +62,7 @@ setMethodS3("geneBlocksStats", "AffymetrixCelSet", function(cs, design, verbose=
 
 	saveObject(annot, file=paste("annot",".Rdata", sep=""))
 	
-	return(.geneBlocksStats(cs, design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot))
+	return(.geneBlocksStats(design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot))
 
 }
 )
@@ -80,6 +80,6 @@ setMethodS3("geneBlocksStats", "default", function(cs, ndf, design, verbose=-20,
   
 	annot <- annotationBlocksLookup(probePositions, regionsOfInterestTable)
 
-	return(.geneBlocksStats(cs, design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot))
+	return(.geneBlocksStats(design, diffs, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, annot))
   }
 )

@@ -1,4 +1,4 @@
-.genePromoterStats <- function(cs, geneCoords, design, ind, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot)
+.genePromoterStats <- function(diffs, geneCoords, design, ind, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot)
 {
   means <- tstats <- matrix(NA, nr=nrow(geneCoords), nc=ncol(diffs), dimnames=list(NULL,colnames(design)))
   df <- rep(0,nrow(geneCoords))
@@ -84,7 +84,7 @@ setMethodS3("genePromoterStats", "AffymetrixCelSet", function(cs, geneCoords, de
 		probePositions <- probePositions[pb,]
 		annot <- annotationLookup(probePositions, genePositions, upS, dnS)
 	
-	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
+	return(.genePromoterStats(diffs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
   
 }
 )
@@ -112,6 +112,10 @@ setMethodS3("genePromoterStats", "default", function(cs, ndf, geneCoords, design
 	# will have to change this later ... standardize column names of this table ("seqname","probeset_id")
 	genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, 
 								row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
+	
+	w <- which( rowSums(design != 0) > 0 )							
+	dmP <- log2(cs)
+	diffs <- dmP %*% design[w,]		
 									
 	# run lookup twice.  first to get a list of smaller list of probes to use
 	annot <- annotationLookup(probePositions, genePositions, upS, dnS)
@@ -123,6 +127,6 @@ setMethodS3("genePromoterStats", "default", function(cs, ndf, geneCoords, design
     # saving objects to disk
     saveObject(annot, file=paste("annot.up",upS,".dn",dnS,".Rdata", sep=""))
 
-	return(.genePromoterStats(cs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
+	return(.genePromoterStats(diffs, geneCoords, design, ind = probePositions$index, upStream, downStream, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", annot))
   }
 )
