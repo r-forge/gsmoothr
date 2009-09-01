@@ -38,7 +38,7 @@
   if( ncol(xDf)==5 )
     colnames(xDf)[2:5] <- paste(c("meandiff","tstats","pvals","adjpvals"), gsub(".[1-9]$","",colnames(xDf)[2:5]), sep=".")
   
-    write.csv(cbind(regionsOfInterestTable, xDf))
+    cbind(regionsOfInterestTable, xDf)
 }
 
 setMethodS3("geneBlocksStats", "AffymetrixCelSet", function(cs, design, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable, ...)
@@ -73,7 +73,6 @@ setMethodS3("geneBlocksStats", "default", function(cs, ndf, design, verbose=-20,
 	diffs <- cs %*% design[w,]
 	
 	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)
-	probePositions$chr <- gsub("chr", "", probePositions$chr)	
   
   if( nrow(design) != ncol(cs) )
     stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
