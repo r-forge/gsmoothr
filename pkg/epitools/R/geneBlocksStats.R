@@ -17,7 +17,6 @@
 	    means[i,j] <- rf$coef[1]
         df[i] <- rf$df[2]
 	  } else {
-		print(vind)
         tt <- t.test(diffs[vind,j])
         tstats[i,j] <- tt$statistic
 	    means[i,j] <- tt$estimate
