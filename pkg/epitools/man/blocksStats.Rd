@@ -1,21 +1,24 @@
-\name{geneBlocksStats}
-\alias{geneBlocksStats}
-\alias{geneBlocksStats.AffymetrixCelSet}
-\alias{geneBlocksStats.default}
+\name{blocksStats}
+\alias{blocksStats}
+\alias{blocksStats.AffymetrixCelSet}
+\alias{blocksStats.default}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{A routine to calculate statistics for a given regions in the genome}
+\title{A routine to calculate statistics for regions in the genome}
 \description{
-For each region of interested explicitly specified, this routine interrogates probes for either a high level of absolute signal or a change in signal for some specified contrast (i.e. difference) of interest.
+For each region of interest, this routine interrogates probes for either a high level of absolute signal or a change in signal for some specified contrast (i.e. difference) of interest.  Regions can be surroundings of TSSs, or can be a table of user - specified regions. The function determines if it should calculate around the TSSs or in the user's regions of interest based on whether the variable \code{regionsOfInterestTable} is NULL.
 }
 \usage{
-\method{geneBlocksStats}{AffymetrixCelSet}(cs, design, verbose = -20, robust = FALSE, minNRobust = 10, adjustMethod = "fdr", regionsOfInterestTable, ...)
-\method{geneBlocksStats}{default}(cs, ndf, design, verbose = -20, robust = FALSE, minNRobust = 10, adjustMethod = "fdr", regionsOfInterestTable, ...)
+\method{blocksStats}{AffymetrixCelSet}(cs, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable=NULL, ...)
+\method{blocksStats}{default}(cs, ndf, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{cs}{An \code{AffymetrixCelSet} object, or a data.frame with columns called, presumably from normalized data}
   \item{ndf}{A \code{data.frame} with columns \code{chr}, \code{position}, and \code{index}}
+  \item{geneCoords}{\code{data.frame} giving the gene coordinates. The column names of this are \code{seqname} for the chromosome, \code{probeset_id} for the gene name, \code{start}, \code{stop}, \code{strand}.}
   \item{design}{design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
+  \item{upStream}{number of bases upstream to consider in calculation of statistics}
+  \item{downStream}{number of bases upstream to consider in calculation of statistics}
   \item{verbose}{logical, whether to output commments of the processing}
   \item{robust}{logical, whether to use a robust test when fitting}
   \item{minNRobust}{minimum number of probes to use}
@@ -30,7 +33,7 @@ At present, the approach simply calculates the contrast for each probe and tests
   a \code{data.frame}, with the same number of rows as the input \code{regionsOfInterestTable}, but with additional columns for the statistics calculated at each promoter.
 }
 \author{Mark Robinson}
-\seealso{\code{\link{annotationLookup}}, \code{\link{annotationLookup}}}
+\seealso{\code{\link{annotationLookup}}}
 \examples{
 
 # See the examples in the manual
