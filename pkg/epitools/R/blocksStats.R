@@ -1,6 +1,6 @@
 .blocksStats <- function(diffs, geneCoords, design, upStream, downStream, verbose, robust=FALSE, minNRobust, adjustMethod, regionsOfInterestTable, annot)
 {
-	if(regionsOfInterestTable != NULL)
+	if(!is.null(regionsOfInterestTable))
 	{
 		numrows <- nrow(regionsOfInterestTable)
 	}
@@ -41,7 +41,7 @@
     adjpvals[,i] <- p.adjust(pvals[,i],method=adjustMethod)
   
   xDf <- data.frame(df=df, meandiff=means, tstats=tstats, pvals=pvals, adjpvals=adjpvals)
-  if(regionsOfInterestTable != NULL)
+  if(!is.null(regionsOfInterestTable))
 	{
 		colnames(xDf)[1] <- paste("df",sep=".")	}
 	else
@@ -52,7 +52,7 @@
   if( ncol(xDf)==5 )
     colnames(xDf)[2:5] <- paste(c("meandiff","tstats","pvals","adjpvals"), gsub(".[1-9]$","",colnames(xDf)[2:5]), sep=".")
    
-     if(regionsOfInterestTable != NULL)
+	if(!is.null(regionsOfInterestTable))
 	{
 		cbind(regionsOfInterestTable, xDf)
 	}
@@ -64,11 +64,6 @@
 
 setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable=NULL, ...)
 {
-
-	if(regionsOfInterestTable != NULL)
-	{
-		
-	}
 	require(aroma.affymetrix)
 
   # cs - AffymetrixCelSet to read probe-level data from
@@ -82,11 +77,9 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, 
 	
 	w <- which( rowSums(design != 0) > 0 )
 	cs <- extract(cs,w, verbose=verbose)
-
-	
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
-
-		if(regionsOfInterestTable != NULL)
+	
+		if(!is.null(regionsOfInterestTable))
 		{
 			annot <- annotationBlocksLookup(probePositions, regionsOfInterestTable)
 		}
@@ -107,8 +100,7 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, 
 			# will have to change this later ... standardize column names of this table ("seqname","probeset_id")
 			genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, 
 									row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
-				
-																												
+																											
 			# run lookup twice.  first to get a list of smaller list of probes to use
 			annot <- annotationLookup(probePositions, genePositions, upS, dnS)
 			pb <- unique(unlist(annot$indexes, use.names=FALSE))
@@ -116,9 +108,10 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, 
 			annot <- annotationLookup(probePositions, genePositions, upS, dnS)
 		}
 		
+		ind <- probePositions$index
 		dmP <- extractMatrix(cs,cells=ind,verbose=verbose)
 		diffs <- dmP %*% design[w,]					
-	
+
 	return(.blocksStats(diffs, geneCoords, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, regionsOfInterestTable, annot))
   
 }
@@ -134,7 +127,7 @@ setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upSt
 	diffs <- cs %*% design[w,]
 	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)
 	
-	if(regionsOfInterestTable != NULL)
+	if(!is.null(regionsOfInterestTable))
 	{
 		annot <- annotationBlocksLookup(probePositions, regionsOfInterestTable)
 	}
