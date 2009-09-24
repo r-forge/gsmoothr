@@ -62,7 +62,7 @@
 	}
 }
 
-setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable=NULL, ...)
+setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, regionsOfInterestTable=NULL, ...)
 {
 	require(aroma.affymetrix)
 
@@ -78,53 +78,62 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, 
 	w <- which( rowSums(design != 0) > 0 )
 	cs <- extract(cs,w, verbose=verbose)
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
-	
-		if(!is.null(regionsOfInterestTable))
-		{
-			annot <- annotationBlocksLookup(probePositions, regionsOfInterestTable)
-		}
-		else
-		{
-			if( upStream < 0 ) {
-				warning("Making 'upStream' a positive number.")
-				upStream <- abs(upStream)
-			}
-			
-			upS <- max(min(7500,upStream),2500)
-			dnS <- max(min(2500,downStream),2500)
-		
-			pos <- rep(NA,nrow(geneCoords))
-			pos[geneCoords$strand=="+"] <- geneCoords$start[geneCoords$strand=="+"]
-			pos[geneCoords$strand=="-"] <- geneCoords$stop[geneCoords$strand=="-"]
 
-			# will have to change this later ... standardize column names of this table ("seqname","probeset_id")
-			genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, 
-									row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
-																											
-			# run lookup twice.  first to get a list of smaller list of probes to use
-			annot <- annotationLookup(probePositions, genePositions, upS, dnS)
-			pb <- unique(unlist(annot$indexes, use.names=FALSE))
-			probePositions <- probePositions[pb,]
-			annot <- annotationLookup(probePositions, genePositions, upS, dnS)
+	if(!is.null(regionsOfInterestTable))
+	{
+		annot <- annotationBlocksLookup(probePositions, regionsOfInterestTable)
+	}
+	else
+	{
+		if( upStream < 0 ) {
+			warning("Making 'upStream' a positive number.")
+			upStream <- abs(upStream)
 		}
-		
-		ind <- probePositions$index
-		dmP <- extractMatrix(cs,cells=ind,verbose=verbose)
-		diffs <- dmP %*% design[w,]					
+	
+		pos <- rep(NA,nrow(geneCoords))
+		pos[geneCoords$strand=="+"] <- geneCoords$start[geneCoords$strand=="+"]
+		pos[geneCoords$strand=="-"] <- geneCoords$stop[geneCoords$strand=="-"]
+
+		# will have to change this later ... standardize column names of this table ("seqname","probeset_id")
+		genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, 
+								row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
+																										
+		# run lookup twice.  first to get a list of smaller list of probes to use
+		annot <- annotationLookup(probePositions, genePositions, upStream, downStream)
+		pb <- unique(unlist(annot$indexes, use.names=FALSE))
+		probePositions <- probePositions[pb,]
+		annot <- annotationLookup(probePositions, genePositions, upStream, downStream)
+	}
+	
+	ind <- probePositions$index
+	dmP <- extractMatrix(cs,cells=ind,verbose=verbose)
+	if(log2adjust == TRUE)
+	{
+		diffs <- log2(dmP) %*% design[w,]
+	}
+	else
+	{
+		diffs <- dmP %*% design[w,]
+	}
 
 	return(.blocksStats(diffs, geneCoords, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, regionsOfInterestTable, annot))
   
 }
 )
 
-setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", regionsOfInterestTable=NULL, ...)
+setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upStream=0, downStream=2000, verbose=-20, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, regionsOfInterestTable=NULL, ...)
 {
 	if( nrow(design) != ncol(cs) )
 		stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
 
 	
-	w <- which( rowSums(design != 0) > 0 )							
-	diffs <- cs %*% design[w,]
+	w <- which( rowSums(design != 0) > 0 )	
+	if(log2adjust == TRUE)
+	{						
+		diffs <- log2(cs) %*% design[w,]
+	} else {
+		diffs <- cs %*% design[w,]
+	}
 	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)
 	
 	if(!is.null(regionsOfInterestTable))
@@ -139,9 +148,6 @@ setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upSt
 			warning("Making 'upStream' a positive number.")
 			upStream <- abs(upStream)
 		}
-		
-		upS <- max(min(7500,upStream),2500)
-		dnS <- max(min(2500,downStream),2500)
 	
 		pos <- rep(NA,nrow(geneCoords))
 		pos[geneCoords$strand=="+"] <- geneCoords$start[geneCoords$strand=="+"]
@@ -151,10 +157,10 @@ setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upSt
 		genePositions <- data.frame(chr=geneCoords$seqname,position=pos, strand=geneCoords$strand, row.names=geneCoords$probeset_id, stringsAsFactors=FALSE)
 	
 		# run lookup twice.  first to get a list of smaller list of probes to use
-		annot <- annotationLookup(probePositions, genePositions, upS, dnS)
+		annot <- annotationLookup(probePositions, genePositions, upStream, downStream)
 		pb <- unique(unlist(annot$indexes, use.names=FALSE))
 		probePositions <- probePositions[pb,]
-		annot <- annotationLookup(probePositions, genePositions, upS, dnS)
+		annot <- annotationLookup(probePositions, genePositions, upStream, downStream)
 	}
 
 	return(.blocksStats(diffs, geneCoords, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, regionsOfInterestTable, annot))
