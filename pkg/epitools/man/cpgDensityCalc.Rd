@@ -20,6 +20,6 @@ cpgDensityCalc(locationsTable, windowSize)
 }
 \author{Dario Strbenac}
 \examples{
-TSSTable <- data.frame(chr=c(1,2), position=c(100000,200000))
+TSSTable <- data.frame(chr=paste("chr",c(1,2),sep=""), position=c(100000,200000))
 cpgDensityCalc(TSSTable, 600)
 }

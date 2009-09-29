@@ -8,4 +8,5 @@ cpgDensityCalc <- function(locationsTable, windowSize)
 
 	mms <- new("MEDMEset",chr=as.character(locationsTable$chr),pos=locationsTable$position,logR=dummy,organism="hsa")
 	cgDensity <- CGcount(data=mms,wsize=windowSize)@CGcounts
+	cgDensity
 }
