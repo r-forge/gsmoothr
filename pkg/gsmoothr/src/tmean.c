@@ -38,6 +38,8 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 	for(jj=st; jj <= en; jj++)
 	  dummy[kk++] = x[jj];
 	  
+	kk--;
+	  
 	/* sort vector inline */
 	R_rsort(dummy, kk);
 
