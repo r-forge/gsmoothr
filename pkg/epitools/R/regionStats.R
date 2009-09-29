@@ -135,7 +135,7 @@
 }
 
 #regionStats.AffymetrixCelSet <- function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE) {
-setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE) {
+setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE, ...) {
 
   require(aroma.affymetrix)
 
@@ -179,7 +179,7 @@ setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05,
 })
 
 #regionStats.default <- function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
-setMethodS3("regionStats","default",function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf) {
+setMethodS3("regionStats","default",function(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE,  ndf, ...) {
   #nimblegen data
 
   # cut down on the amount of data read, if some rows of the design matrix are all zeros

@@ -31,5 +31,6 @@ A list with elements
 \author{Dario Strbenac}
 \seealso{}
 \examples{
-	laneBlocksCounts(lanes, humanTSSTable, aligner="Bowtie")
+	## No standard data package can be used to illustrate this.
+        ## laneBlocksCounts(lanes, humanTSSTable, aligner="Bowtie")
 }
