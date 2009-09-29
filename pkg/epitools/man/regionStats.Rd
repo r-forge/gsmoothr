@@ -10,9 +10,8 @@
 The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is calculated as the ratio of the number of significant regions found in a premutation-based test, to the number found in the actual experimental microarray data. The function then finds regions that have a number of probes above a pre-specified number, in regions of the genome, of a certain size.
 }
 \usage{
-\method{regionStats}{default}
-
-\method{regionStats}{AffymetrixCelSet}
+\method{regionStats}{default}(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE, ndf)
+\method{regionStats}{AffymetrixCelSet}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

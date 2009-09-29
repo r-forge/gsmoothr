@@ -11,7 +11,7 @@ laneBlocksCounts(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, re
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lanesPath}{Path to where the .fastq files of reads are.}
-  \item{TSSannotationPath}{A data frame containing the TSS details of the organism of interest. Column names must be name, chr, start, stop, strand.}
+  \item{TSSDataTable}{A data frame containing the TSS details of the organism of interest. Column names must be name, chr, start, stop, strand.}
   \item{upstream}{Bases upstream from TSS to start the regions.}
   \item{downstream}{Bases downstream from TSS to end the regions.}
   \item{removeDuplications}{Boolean. Should alignments also be processed, where duplicate reads are firstly eliminated?}

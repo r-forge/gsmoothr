@@ -2,8 +2,7 @@
 \alias{cpgDensityCalc}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculate CpG Density in a Window}
-\description{
-
+\description{Function to calculate CpG density around a position.
 }
 \usage{
 cpgDensityCalc(locationsTable, windowSize)
@@ -21,5 +20,6 @@ cpgDensityCalc(locationsTable, windowSize)
 }
 \author{Dario Strbenac}
 \examples{
+TSSTable <- data.frame(chr=c(1,2), position=c(100000,200000))
 cpgDensityCalc(TSSTable, 600)
 }
