@@ -3,13 +3,13 @@
 \alias{regionStats}
 \alias{regionStats.AffymetrixCelSet}
 \alias{regionStats.default}
-\title{Find Regions of High MAT Scores}
+\title{Find Regions of significance in microarray data}
 \description{
-The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is calculated as the ratio of the number of significant regions found in a premutation-based test, to the number found in the actual experimental microarray data. The function then finds regions that have a number of probes above a pre-specified number, in regions of the genome, of a certain size.
+The function finds the highest smoothed score cutoff for a pre-specified FDR. Smoothing is performed over a specified number of basepairs, and regions must have a minimum number of qualifying probes to be considered significant. The FDR is calculated as the ratio of the number of significant regions found in a permutation-based test, to the number found in the actual experimental microarray data. 
 }
 \usage{
-\method{regionStats}{default}(cs, design, ind=NULL, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, fdrProbes=FALSE, ndf, ...)
-\method{regionStats}{AffymetrixCelSet}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, verbose=TRUE, ind=NULL, fdrProbes = FALSE, ...)
+\method{regionStats}{default}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, ...)
+\method{regionStats}{AffymetrixCelSet}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,10 +20,11 @@ The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is 
   \item{probeWindow}{Size of window, in base pairs, to check for }
   \item{meanTrim}{A number representing the top and bottom fraction of ordered values in a window to be removed, before the window mean is calculated.}
   \item{nProbes}{Minimum number of probes in a window, for the region to qualify as a region of significance.}
+  \item{maxGap}{Maximum gap between significant probes allowable.} 
+  \item{twoSides}{Look for both significant positive and negative regions.}
   \item{verbose}{Print debugging comments while executing.} 
   \item{ind}{A vector of the positions of the probes on the array}
-  \item{fdrProbes}{If TRUE, a count of the number of probes in all significant regions is calculated.}
-  \item{ndf}{The Nimblegen Definition File for Nimblegen array data.}\
+  \item{ndf}{The Nimblegen Definition File for Nimblegen array data.}
   \item{...}{Arguments passed to internal function for common processing.}
 }
 \details{}
@@ -39,6 +40,6 @@ The function finds the highest MAT score cutoff for a pre-specified FDR. FDR is 
 
 \seealso{}
 \examples{
-function (cs, design, fdrLevel = 0.05, nPermutations = 5, probeWindow = 600, meanTrim = 0.1, nProbes = 10, verbose = TRUE, fdrProbes = FALSE, ...) 
+function (cs, design, fdrLevel = 0.05, nPermutations = 5, probeWindow = 600, meanTrim = 0.1, nProbes = 10, verbose = TRUE, ...) 
 UseMethod("regionStats")
 }

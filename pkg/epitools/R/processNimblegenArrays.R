@@ -1,5 +1,5 @@
 processNDF <- function(filename, ncols=768) {
-	ndfTemp <- read.table(filename, sep="\t", header=TRUE, stringsAsFactors=FALSE, comment.char="")
+	ndfTemp <- read.table(filename, sep="\t", header=TRUE, stringsAsFactors=FALSE, comment.char="", colClasses=c('NULL','NULL','NULL','NULL','NULL','character','NULL','NULL','NULL','NULL','NULL','NULL','character','integer','NULL','integer','integer'))
 	
 	#determine if reverse strand probe are marked by _RS or RS	
 	if (length(grep("_RS", ndfTemp$PROBE_ID))>0) rsSymbol = "_RS" else rsSymbol="RS"
