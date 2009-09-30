@@ -27,8 +27,9 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 	/* find set of probes to use */
     while( (sp[ii]-sp[st]) > pw )
 	  st++;
-    while( ((sp[en]-sp[ii]) < pw) && (en < (n-1)) )
+    while( ((sp[en]-sp[ii]) < pw) && (en < n) )
 	  en++;
+	en--;
 	if ((en-st+1) < np)
 	  continue;
   /*printf("ii=%d, st=%d, en=%d\n", ii, st, en);*/
@@ -45,14 +46,14 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 
 	/* take mean of (internal portion) of dummy */
 	sm = 0.;
-    lo = floor((float) kk * tr);
-    hi = kk-lo-1;
+    lo = floor(((float) kk + 1.0) * tr);
+    hi = kk-lo;
     // printf("lo=%d hi=%d H-L+1=%d\n", lo, hi, (hi-lo+1));
 	for(jj=lo; jj <= hi; jj++)
 	  sm += dummy[jj];
 	
 	/* assign smoothed data */
-	xs[ii] = sm/sqrt((float)(hi-lo+1));
+	xs[ii] = sm/sqrt((float)(hi-lo + 1));
   }
 
 
