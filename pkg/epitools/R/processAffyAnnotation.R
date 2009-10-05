@@ -1,4 +1,4 @@
-processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, verbose=TRUE) {
+processAffyAnnotation <- function(csvFile, skip=19, keepColumns=c("probeset_id","seqname","strand","start","stop","total_probes","category"), getRefseq=FALSE, verbose=TRUE) {
 
   if (verbose)
     cat("Reading file:", csvFile,"\n")
@@ -14,15 +14,18 @@ processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, verbose=TRU
     s<-strsplit(u,split=" // ")[[1]];
     if(length(s)>1) {
       if(s[2]=="ENSEMBL") {
-        gtype <- strsplit(s[3]," ")[[1]][1]
-        return( paste(s[2],gtype,sep="-") )
+        #gtype <- strsplit(s[3]," ")[[1]][1]
+        #return( paste(s[2],gtype,sep="-") )
+        return(c(s[2],s[1]))
       } else {
-        return(s[2])
+        return(c(s[2],s[1]))
       }
     } else {
-      return(s[1])
+      return(c(s[1],s[1]))
     }
   })
+  ms <- t(ms)
+  colnames(ms) <- c("source","identifier")
   
   if (verbose)
     cat("Parsing gene symbol.\n")
@@ -30,11 +33,11 @@ processAffyAnnotation <- function(csvFile, skip=19, getRefseq=FALSE, verbose=TRU
   names(g)<-anno$probeset_id
   h<-sapply(g,FUN=function(u) { s<-strsplit(u,split=" // ", fixed=TRUE)[[1]]; ifelse(length(s)>1,s[2],s[1])})
   
-  anno <- anno[,c("probeset_id","seqname","strand","start","stop","total_probes","category")]
+  anno <- anno[,keepColumns]
   if( getRefseq ) {
     r<-sapply(g,FUN=function(u) strsplit(u,split=" // ", fixed=TRUE)[[1]][1])
-		data.frame(anno,id=r,symbol=h,type=ms)
+		data.frame(anno,id=r,symbol=h,ms)
   } else {
-		data.frame(anno,symbol=h,type=ms)
+		data.frame(anno,symbol=h,ms)
   }
 }

@@ -6,12 +6,13 @@
 Reads the CSV file and only returns a subset of the columns and has an option to peel off the RefSeq identifier.
 }
 \usage{
-processAffyAnnotation(csvFile, skip = 19, getRefseq = FALSE, verbose = TRUE)
+processAffyAnnotation(csvFile, skip=19, keepColumns=c("probeset_id","seqname","strand","start","stop","total_probes","category"), getRefseq=FALSE, verbose=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{csvFile}{filename of Affymetrix CSV file}
   \item{skip}{number of lines at top of CSV file to skip}
+  \item{keepColumns}{a vector of column names to keep from the original CSV file}
   \item{getRefseq}{logical, whether to process the 'gene_assignment' column for }
   \item{verbose}{logical, whether to write progress to the screen}
 }
