@@ -87,7 +87,7 @@
   }
 
   
-  fdrTable <- function(realScore, permScore, ch, sp, cutsLength, nProbes, maxGap, twoSides, minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE )) {
+  fdrTable <- function(realScore, permScore, ch, sp, cutsLength, nProbes, maxGap, twoSides, minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE ), verbose) {
     require(gsmoothr)
     cuts <- seq(minCutoff,maxCutoff,length=cutsLength)
 
@@ -97,9 +97,9 @@
       pos <- nrow(getRegions(realScore, ch, sp, nProbes, maxGap, cuts[i], twoSides, doJoin=FALSE))
       neg <- nrow(getRegions(permScore, ch, sp, nProbes, maxGap, cuts[i], twoSides, doJoin=FALSE))
       fdr[i,] <- c(cuts[i],neg,pos,min(neg/pos,1))
-      cat(".")
+      if (verbose) cat(".")
     }
-    cat("\n")
+    if (verbose) cat("\n")
     as.data.frame(fdr)
   }
 
@@ -144,7 +144,7 @@
 	mx <- max(abs(tmeanPerms[[col]]),na.rm=TRUE)
 
 
-	z <- apply(tmeanPerms[[col]], 2, FUN=function(u) fdrTable(tmeanReal[,col], u, ch, sp, 40, nProbes, maxGap, twoSides, maxCut=mx))
+	z <- apply(tmeanPerms[[col]], 2, FUN=function(u) fdrTable(tmeanReal[,col], u, ch, sp, 40, nProbes, maxGap, twoSides, maxCut=mx, verbose=verbose))
 	fdrTabs[[col]] <- z[[1]]
 	for(i in 2:length(nPermutations))
 	  fdrTabs[[col]][,2:3] <- fdrTabs[[col]][,2:3] + z[[i]][,2:3]
