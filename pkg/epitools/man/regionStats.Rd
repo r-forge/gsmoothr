@@ -8,8 +8,8 @@
 The function finds the highest smoothed score cutoff for a pre-specified FDR. Smoothing is performed over a specified number of basepairs, and regions must have a minimum number of qualifying probes to be considered significant. The FDR is calculated as the ratio of the number of significant regions found in a permutation-based test, to the number found in the actual experimental microarray data. 
 }
 \usage{
-\method{regionStats}{default}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, ...)
-\method{regionStats}{AffymetrixCelSet}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, ...)
+\method{regionStats}{default}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, returnTrimmedMeans = FALSE ...)
+\method{regionStats}{AffymetrixCelSet}(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, returnTrimmedMeans = FALSE ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,14 +25,16 @@ The function finds the highest smoothed score cutoff for a pre-specified FDR. Sm
   \item{verbose}{Print debugging comments while executing.} 
   \item{ind}{A vector of the positions of the probes on the array}
   \item{ndf}{The Nimblegen Definition File for Nimblegen array data.}
+  \item{returnTrimmedMeans}{If TRUE, the values of the trimmed means of the intensities and permuted intensities are also retuned from the function.}
   \item{...}{Arguments passed to internal function for common processing.}
 }
 \details{}
 \value{
-	\item{chr}{Chromosome number that the region is on.}
-	\item{start}{Number of the base pair where the region starts. The number is from the start of the particular chromosome the region is on.}
-	\item{end}{Number of the nucelotide where the region ends. The number is from the start of the particular chromosome the region is on.}
-	\item{score}{MAT score of the region.}
+	A list with elements
+	\item{regions}{A list of \code{data.frame}. Each \code{data.frame} has columns \code{chr}, \code{start}, \code{end}, \code{score}.}
+	\item{tMeanReal}{Matrix of smoothed scores of intensity data. Each column is an experimental design.}
+	\item{tMeanPerms}{Matrix of smoothed scores of permuted intensity data. Each column is an experimental design.}
+	\item{fdrTables}{List of table of FDR at different score cutoffs. Each list element is for a different experimental design.}
 }
 \references{}
 \author{Mark Robinson}

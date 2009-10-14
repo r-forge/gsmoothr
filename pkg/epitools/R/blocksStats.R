@@ -75,6 +75,16 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, geneCoords, design, 
   if( nrow(design) != nbrOfArrays(cs) )
     stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
 	
+  if(!is.null(regionsOfInterestTable))
+  {
+	if(!setequal(colnames(regionsOfInterestTable), c("chr", "start", "end", "strand", "name")))
+		stop("Incorrect column headings. Check documentation for details.")
+  } else {
+	if(!setequal(colnames(geneCoords), c("seqname", "probeset_id", "start", "stop", "strand")))
+		stop("Incorrect column headings. Check documentation for details.")  
+  }
+  
+	
 	w <- which( rowSums(design != 0) > 0 )
 	cs <- extract(cs,w, verbose=verbose)
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
@@ -125,7 +135,15 @@ setMethodS3("blocksStats", "default", function(cs, ndf, geneCoords, design, upSt
 {
 	if( nrow(design) != ncol(cs) )
 		stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
-
+  
+  if(!is.null(regionsOfInterestTable))
+  {
+	if(!setequal(colnames(regionsOfInterestTable), c("chr", "start", "end", "strand", "name")))
+		stop("Incorrect column headings. Check documentation for details.")
+  } else {
+	if(!setequal(colnames(geneCoords), c("seqname", "probeset_id", "start", "stop", "strand")))
+		stop("Incorrect column headings. Check documentation for details.")  
+  }
 	
 	w <- which( rowSums(design != 0) > 0 )	
 	if(log2adjust == TRUE)

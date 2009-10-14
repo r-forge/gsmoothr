@@ -15,7 +15,7 @@ For each region of interest, this routine interrogates probes for either a high 
 \arguments{
   \item{cs}{An \code{AffymetrixCelSet} object, or a data.frame with columns called, presumably from normalized data}
   \item{ndf}{A \code{data.frame} with columns \code{chr}, \code{position}, and \code{index}}
-  \item{geneCoords}{\code{data.frame} giving the gene coordinates. The column names of this are \code{seqname} for the chromosome, \code{probeset_id} for the gene name, \code{start}, \code{stop}, \code{strand}.}
+  \item{geneCoords}{\code{data.frame} giving the gene coordinates. The column names of this are \code{seqname} for the chromosome, \code{probeset_id}, \code{start}, \code{stop}, \code{strand}.}
   \item{design}{design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
   \item{upStream}{number of bases upstream to consider in calculation of statistics}
   \item{downStream}{number of bases upstream to consider in calculation of statistics}

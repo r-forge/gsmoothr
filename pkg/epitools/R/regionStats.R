@@ -2,7 +2,7 @@
 
 #regionStats <- function(...) UseMethod("regionStats")
 
-.regionStats <- function(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose) {
+.regionStats <- function(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose, returnTrimmedMeans) {
 
 
   getBed <- function(score, ch, sp, cut=NULL, nProbes=10, maxGap, twoSides) {
@@ -162,12 +162,17 @@
 	
   }
   
-  return(list(regions=regions,tmeanReal=tmeanReal,tmeanPerms=tmeanPerms,fdrTables=fdrTabs))
+  if(returnTrimmedMeans == TRUE)
+  {
+	return(list(regions=regions,tmeanReal=tmeanReal,tmeanPerms=tmeanPerms,fdrTables=fdrTabs))
+  } else {
+	return(list(regions=regions, fdrTables=fdrTabs))
+  }
 
 }
 
 
-setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, ...) {
+setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, returnTrimmedMeans = FALSE ...) {
 
   require(aroma.affymetrix)
 
@@ -207,11 +212,11 @@ setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05,
   rm(dmP)
   ifelse( verbose, print(gc()), gc())
 
-  return(.regionStats(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose))
+  return(.regionStats(diffs, design, ch, sp, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose, returnTrimmedMeans))
 })
 
 
-setMethodS3("regionStats","default",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, ...) {
+setMethodS3("regionStats","default",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, returnTrimmedMeans = FALSE ...) {
   #nimblegen data
 
   # cut down on the amount of data read, if some rows of the design matrix are all zeros
@@ -223,6 +228,6 @@ setMethodS3("regionStats","default",function(cs, design, fdrLevel=0.05, nPermuta
     cat("Removing", sum(!w), "rows, due to NAs.\n")
 
 
-  return(.regionStats(diffs, design, gsub("chr","",ndf$chr), ndf$position, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose))
+  return(.regionStats(diffs, design, gsub("chr","",ndf$chr), ndf$position, fdrLevel, nPermutations, probeWindow, meanTrim, nProbes, maxGap, twoSides, verbose, returnTrimmedMeans))
 })
 
