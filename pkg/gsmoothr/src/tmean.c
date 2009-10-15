@@ -46,7 +46,7 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 
 	/* take mean of (internal portion) of dummy */
 	sm = 0.;
-    lo = floor(((float) kk + 1.0) * tr);
+    lo = floor(((float) kk + 1.0) * tr + 0.5); // +0.5 to make a 'round' function.
     hi = kk-lo;
     // printf("lo=%d hi=%d H-L+1=%d\n", lo, hi, (hi-lo+1));
 	for(jj=lo; jj <= hi; jj++)
