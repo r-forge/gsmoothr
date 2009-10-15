@@ -172,7 +172,7 @@
 }
 
 
-setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, returnTrimmedMeans = FALSE ...) {
+setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ind=NULL, returnTrimmedMeans = FALSE, ...) {
 
   require(aroma.affymetrix)
 
@@ -216,7 +216,7 @@ setMethodS3("regionStats","AffymetrixCelSet",function(cs, design, fdrLevel=0.05,
 })
 
 
-setMethodS3("regionStats","default",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, returnTrimmedMeans = FALSE ...) {
+setMethodS3("regionStats","default",function(cs, design, fdrLevel=0.05, nPermutations=5, probeWindow=600, meanTrim=.1, nProbes=10, maxGap=500, twoSides=TRUE, verbose=TRUE, ndf, returnTrimmedMeans = FALSE, ...) {
   #nimblegen data
 
   # cut down on the amount of data read, if some rows of the design matrix are all zeros
