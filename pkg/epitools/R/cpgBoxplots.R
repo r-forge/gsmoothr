@@ -1,4 +1,4 @@
-.cpgBoxplots <- function(dm, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, gcCount, cb, sampleNames)
+.cpgBoxplots <- function(dm, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, ylim, gcCount, cb, sampleNames)
 {
   if(calcDiff){
     title1 <- paste( col, paste(sampleNames,collapse="-"), sep="=" )
@@ -128,8 +128,8 @@ setMethodS3("cpgBoxplots", "AffymetrixCelSet", function(this, ..., samples=c(1,2
   bins <- createBins(cpgDens, nBins)
   verbose && exit(verbose);
 
-  .cpgBoxplots(this, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, gcCount, cb, sampleNames)												 
-}
+  .cpgBoxplots(dm, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, ylim, gcCount, cb, sampleNames)												 
+} 
 )
 
 setMethodS3("cpgBoxplots", "default", function(this, ndfTable, ..., samples=c(1,2), subsetChrs="chr[1-5]", gcContent=7:18, 
@@ -181,6 +181,6 @@ setMethodS3("cpgBoxplots", "default", function(this, ndfTable, ..., samples=c(1,
   
   sampleNames <- colnames(this)[samples]
   
-  .cpgBoxplots(this, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, gcCount, cb, sampleNames)
+  .cpgBoxplots(this, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, ylim, gcCount, cb, sampleNames)
 }
 )
