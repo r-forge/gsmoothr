@@ -15,6 +15,8 @@
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Loop through G+C contents and 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  bp <- NULL
+  count <- 0
   for(j in gcContent) {
     w <- which( gcCount==j)
 	if( length(w)==0 )
@@ -24,17 +26,20 @@
 	main <- paste(title1,title2,sep="\n")
 	
 	if (calcDiff) {
-	  boxplot( dm[w,1]-dm[w,2] ~ bins[w], xlim=c(0,actualNBins),ylim=ylim,col=col,main=main,las=2,cex.axis=.8,cex.main=.9)
+    count <- count+1
+	  bp[[count]] <- boxplot( dm[w,1]-dm[w,2] ~ bins[w], xlim=c(0,actualNBins),ylim=ylim,col=col,main=main,las=2,cex.axis=.8,cex.main=.9)
 	} else {
-      boxplot( dm[w,1] ~ bins[w], at=(1:actualNBins)/2, boxwex=.4,xlim=c(0,actualNBins),ylim=ylim,col=col[1],main=main,las=2,cex.axis=.8,cex.main=.9)
-      boxplot( dm[w,2] ~ bins[w], at=((actualNBins+1):(actualNBins*2))/2,boxwex=.4, main="",col=col[2],add=TRUE,las=2,cex.axis=.8)
+    count <- count+1
+    bp[[count]] <- boxplot( dm[w,1] ~ bins[w], at=(1:actualNBins)/2, boxwex=.4,xlim=c(0,actualNBins),ylim=ylim,col=col[1],main=main,las=2,cex.axis=.8,cex.main=.9)
+    count <- count+1
+    bp[[count]] <- boxplot( dm[w,2] ~ bins[w], at=((actualNBins+1):(actualNBins*2))/2,boxwex=.4, main="",col=col[2],add=TRUE,las=2,cex.axis=.8)
 	}
   }
   
   if( !is.null(pdfFile) )
     dev.off()
 	
-  invisible(TRUE)
+  invisible(bp)
 }
 
 createBins <- function(u, nBins) {
