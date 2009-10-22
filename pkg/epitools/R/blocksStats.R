@@ -62,11 +62,10 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, de
     stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix")
   
   if(!all(c("chr", "name", "start", "end", "strand")  %in% colnames(coordinatesTable)))
-		stop("Incorrect column headings for coordinatesTable. Check documentation for details.")  
-  }
+	stop("Incorrect column headings for coordinatesTable. Check documentation for details.")  
 	
 	w <- which( rowSums(design != 0) > 0 )
-	cs <- extract(cs,w, verbose=verbose)
+	cs <- extract(cs, w, verbose=verbose)
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
 
 	if(useAsRegions == TRUE)
