@@ -105,7 +105,7 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, de
 		diffs <- dmP %*% design[w,]
 	}
 
-	return(.blocksStats(diffs, coordinatesTable, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, regionsOfInterestTable, annot))
+	return(.blocksStats(diffs, coordinatesTable, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, useAsRegions, annot))
   
 }
 )
