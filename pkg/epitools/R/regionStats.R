@@ -46,19 +46,6 @@
       st <- ind.2[which(df==1)]
       en <- ind.2[which(df==-1)-1]
 
-#     not needed anymore due to padding
-#     en <- en[en>=st[1]]
-#     st <- st[1:length(en)]
-
-      #split up regions which have > maxGap basepairs between positive probes
-#      probeGaps <- c(F,diff(sp)> maxGap)
-#      if (length(en)>0) for (i in 1:length(en)) if (any(probeGaps[st[i]:en[i]])) { #has gaps -> split up
-#	gap.w <- (st[i]:en[i])[which(probeGaps[st[i]:en[i]])]
-#        st <- c(st, gap.w)
-#        en <- c(en, gap.w[-1]-1, en[i])
-#        en[i] <- gap.w[1]-1
-#      }
-
       #sort starts & ends again
       st <- sort(st)
       en <- sort(en)
