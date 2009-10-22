@@ -27,7 +27,7 @@ void tmean(double *x, double *xs, int *sp, int *n_, double *_tr, int *_np, int *
 	/* find set of probes to use */
     while( (sp[ii]-sp[st]) > pw )
 	  st++;
-    while( ((sp[en]-sp[ii]) < pw) && (en < n) )
+    while( (en < n) && ((sp[en]-sp[ii]) < pw))
 	  en++;
 	en--;
 	if ((en-st+1) < np)

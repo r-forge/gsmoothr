@@ -1,15 +1,17 @@
-laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, removeDuplications=FALSE, doQuality=FALSE, aligner)
+laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, removeDuplications=FALSE, doQuality=FALSE, aligner="Bowtie")
 {
 	require(epitools)
 	require(IRanges)
 	require(ShortRead)
+	
+	if(!all(c("chr", "name", "start", "end", "strand")  %in% colnames(TSSDataTable)))
+		stop("Incorrect column headings for TSSDataTable. Check documentation for details.")
 
 	fileNames <- dir(lanesPath, pattern="fastq")
 	fileNames <- gsub(".fastq", "", fileNames)
 	
-	
-	startPositions <- as.numeric(apply(TSSDataTable, 1, function(x) ifelse(x["strand"]=="+", as.numeric(x["start"])-upstream, as.numeric(x["stop"])-downstream)))
-	endPositions <- as.numeric(apply(TSSDataTable, 1, function(x) ifelse(x["strand"]=="+", as.numeric(x["start"])+downstream, as.numeric(x["stop"])+upstream)))
+	startPositions <- as.numeric(apply(TSSDataTable, 1, function(x) ifelse(x["strand"]=="+", as.numeric(x["start"])-upstream, as.numeric(x["end"])-downstream)))
+	endPositions <- as.numeric(apply(TSSDataTable, 1, function(x) ifelse(x["strand"]=="+", as.numeric(x["start"])+downstream, as.numeric(x["end"])+upstream)))
 	
 	TSSranges <- mapply(IRanges, start=split(startPositions, TSSDataTable$chr), end=split(endPositions, TSSDataTable$chr), names=split(as.character(TSSDataTable$name), TSSDataTable$chr))
 	
@@ -47,8 +49,9 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 		}
 		
 		#no duplicate filter
-		if (file.exists(paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"dups",".rda",sep=""))) 
-			load(paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"dups",".rda",sep="")) 
+		filename <- paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"dups",".rda",sep="")
+		if (file.exists(filename)) 
+			load(filename)
 		else
 		{
 		   readAligned.dups <- readAligned(paste(lanesPath,"/",fileNames[index],sep=""), paste(fileNames[index], extension, sep=""), type=aligner)
@@ -74,8 +77,9 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 		#duplicate filter
 		if(removeDuplications == TRUE)
 		{
-			if (file.exists(paste(fileNames[index],"/",fileNames[index],"nodups",".rda",sep=""))) 
-				load(paste(fileNames[index],"/",fileNames[index],"nodups",".rda",sep=""))
+			filename <- paste(fileNames[index],"/",fileNames[index],"nodups",".rda",sep="")
+			if (file.exists(filename))
+				load(filename)
 			else
 			{
 			   readAligned.nodups <- readAligned(paste(lanesPath,"/",fileNames[index],sep=""), paste(fileNames[index], extension, sep=""), type=aligner, filter=uniqueFilter(withSread = FALSE))
@@ -93,9 +97,9 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 			gc()
 		}
 	}
-
-	write.table(readCounts, paste(lanesPath, "counts.txt", sep="/"))
-	write.table(readCountsNoDuplications, paste(lanesPath, "countsNoDuplication.txt", sep="/"))
 	
-	return(list(readCounts=readCounts, readCountsNoDuplications=readCountsNoDuplications))
+	if(removeDuplications==TRUE)
+		return(list(readCounts=readCounts, readCountsNoDuplications=readCountsNoDuplications))
+	else
+		return(list(readCounts=readCounts, readCountsNoDuplications=NULL))
 }

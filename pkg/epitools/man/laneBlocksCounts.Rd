@@ -6,7 +6,7 @@
 Reads in all the .fastq files in the lanesPath directory and finds the count of reads in an upstream and downstream range from every gene's TSS.
 }
 \usage{
-laneBlocksCounts(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, removeDuplications=FALSE, doQuality=FALSE, aligner)
+laneBlocksCounts(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, removeDuplications=FALSE, doQuality=FALSE, aligner="Bowtie")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,7 +19,7 @@ laneBlocksCounts(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, re
   \item{aligner}{Either "Bowtie", "MAQ", or "SolexaExport". The program that created the alignments.}
 }
 \details{
-	The function makes a list of IRanges of the TSS starts of genes. Then, IRanges of singly-mapped reads, for each chromosome, are read. The alignments for each lane are to be located in a sub-directory of\code{lanesPath} with the sub-directory name being the name of the particular read filename (without the extension). For each TSS, the count of mappable reads overlapping with the TSS regions are made into a table, and this is written to the \code{lanesPath} directory. If \code{doQuality} is FALSE, one file called "counts.txt" is written. If \code{doQuality} is TRUE, the file "countsNoDuplication.txt" is additionally written.
+	The function makes a list of IRanges of the TSS starts of genes. Then, IRanges of singly-mapped reads, for each chromosome, are read. The alignments for each lane are to be located in a sub-directory of\code{lanesPath} with the sub-directory name being the name of the particular read filename (without the extension). For each TSS, the count of mappable reads overlapping with the TSS regions are made into a table.
 	
 	The .html quality reports for each lane are written to the directory for that lane.
 }
