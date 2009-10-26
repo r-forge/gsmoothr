@@ -29,7 +29,6 @@ A list with elements
 \item{readConutsNoDuplications}{Matrix of counts for non-duplicated reads. Rows are gene TSS regions. Columns are sequencing lanes.}
 }
 \author{Dario Strbenac}
-\seealso{}
 \examples{
 	## No standard data package can be used to illustrate this.
         ## laneBlocksCounts(lanes, humanTSSTable, aligner="Bowtie")

@@ -16,8 +16,6 @@ processAffyAnnotation(csvFile, skip=19, keepColumns=c("probeset_id","seqname","s
   \item{getRefseq}{logical, whether to process the 'gene_assignment' column for }
   \item{verbose}{logical, whether to write progress to the screen}
 }
-\details{
-}
 \value{
 a data.frame with a row for each Affymetrix probeset id.
 }

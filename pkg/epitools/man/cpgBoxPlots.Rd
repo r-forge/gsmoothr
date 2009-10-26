@@ -41,6 +41,3 @@
  Invisibly returns a list of the plots.
 }
 \author{Mark Robinson, Dario Strbenac}
-\examples{
-
-}

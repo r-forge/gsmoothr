@@ -1,7 +1,5 @@
 binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, ...) {
 
-  par(mfrow=c(ncol(dataMatrix),1), mar=c(0,0,0,5), xpd=TRUE)
-  
   plotType <- match.arg(plotType)
   
   if( is.null(cols) ) {
@@ -21,7 +19,7 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
       list(breakpoints=br, intervals=cut(u,breaks=br))
 	} else if(class(u)=="factor") {
 	  nbins <- length(levels(u))
-	  u
+	  list(breakpoints=u, intervals=u)
 	}
   }
   
@@ -43,13 +41,15 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
   }
   
   for(k in 1:length(orderingList)) {
-    cat(names(orderingList)[k],": ",sep="")
+    if(class(orderingList[[k]])=="numeric")
+		cat(names(orderingList)[k],": ",sep="")
 	
 	cutLevels <- levels( breaks[[k]][["intervals"]] )
   
     for(j in 1:length(cutLevels)) {
       lev <- cutLevels[j]
-	  cat(lev," ")
+	  if(class(orderingList[[k]])=="numeric")
+		cat(lev," ")
       for(i in 1:ncol(dataMatrix)) {
         if( plotType %in% c("line","heatmap")) {
           intensScores[i,,j,k] <- .scoreIntensity(lookupTable[breaks[[k]][["intervals"]]==lev,], intensities=dataMatrix[,i], 
@@ -85,15 +85,19 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	if(plotType=="line")
 	{
 	  layout(rbind(c(1, 2)), widths=c(3,2))
-	  par(mai=c(1.02,0.90,0.82,1.90))
-	  matplot(xval,dm,type="l",col=cols,lty=lty,lwd=lwd,main=titName,xlab="Position relative to TSS",ylab="Signal",ylim=rng)
-	  par(mai=c(1.02,0.05,0.82,3))
+	  par(mai=c(1.02,0.90,0.82,0))
+	  matplot(xval,dm,type="l",col=cols,lty=lty,lwd=lwd,xlab="Position relative to TSS",ylab="Signal",ylim=rng)
+	  par(mai=c(1.02,0.05,0.82,0))
+	  plot.new()
 	  legend(x="top", title ="Line Colours", col=cols, lty = 1, legend=cutLevels)
 	  print(cols)
 	  print(breaks[[i]][["intervals"]])
+	  par(oma = c(0, 0, 2, 0))
+	  mtext(titName, line = 0.5, outer = TRUE)
 	} else if(plotType=="heatmap") {
 	  layout(rbind(c(1,2,3)), widths=c(1,3,1))
 	  par(mai=c(1.02,0.50,0.82,0.05))
+	  par(oma = c(0, 0, 0, 0))
 	  image(rbind(1:nbins), col=cols,axes=F, xlab="Signal Intensity")
 	  axis(2, at=(0:nbins)/nbins, labels=format(seq(rng[1], rng[2], length.out=nbins+1), digits=1))
 	  par(mai=c(1.02,0.05,0.82,0.05))
@@ -105,6 +109,4 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
   }
   
   invisible(intensScores)
-  
-
 }

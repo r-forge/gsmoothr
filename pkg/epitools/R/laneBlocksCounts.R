@@ -14,6 +14,7 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 	endPositions <- as.numeric(apply(TSSDataTable, 1, function(x) ifelse(x["strand"]=="+", as.numeric(x["start"])+downstream, as.numeric(x["end"])+upstream)))
 	
 	TSSranges <- mapply(IRanges, start=split(startPositions, TSSDataTable$chr), end=split(endPositions, TSSDataTable$chr), names=split(as.character(TSSDataTable$name), TSSDataTable$chr))
+	namesOnEachChromosome <- split(as.character(TSSDataTable$name), TSSDataTable$chr)
 	
 	TSSL <- do.call(RangesList, TSSranges)
 	readCounts <- matrix(nrow=nrow(TSSDataTable), ncol = length(fileNames))
@@ -42,7 +43,10 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 			stop("Can't find your alignment files.")
 		}
 		
-		if(doQuality == TRUE)
+		writeAccess <- file.access(paste(lanesPath,"/",fileNames[index]), 2)
+		cat("Warning : Unable to write to directory ", paste(lanesPath, fileNames[index], sep = "/"), ". Can't save alignment in .rda file or write out quality reports.")
+		
+		if(doQuality == TRUE && writeAccess == 0)
 		{
 			qualityAssessment <- qa(lanesPath, paste(fileNames[index],"\\.fastq", sep=""), type="fastq")
 			report(qualityAssessment, dest = paste(lanesPath, fileNames[index], "fastqReport", sep="/"))
@@ -55,10 +59,11 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 		else
 		{
 		   readAligned.dups <- readAligned(paste(lanesPath,"/",fileNames[index],sep=""), paste(fileNames[index], extension, sep=""), type=aligner)
-		   save(readAligned.dups, file=paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"dups",".rda",sep=""))
+		   if(writeAccess == 0)
+			save(readAligned.dups, file=paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"dups",".rda",sep=""))
 		}
 		
-		if(doQuality == TRUE)
+		if(doQuality == TRUE && writeAccess == 0)
 		{
 			qualityAssessment <- qa(paste(lanesPath,"/",fileNames[index],sep=""), paste("\\", extension, sep=""), type=aligner)
 			report(qualityAssessment, dest = paste(lanesPath,fileNames[index], "alignmentReport", sep="/"))
@@ -69,7 +74,10 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 		alignedL <- do.call(RangesList, readsRanges)
 
 		countTables <- lapply(overlap(alignedL, TSSL), as.table)
-		readCounts[,index] <- unlist(countTables)
+		for(chromosomeIndex in 1 : length(namesOnEachChromosome))
+		{
+			readCounts[namesOnEachChromosome[[chromosomeIndex]],index] <- countTables[[chromosomeIndex]]
+		}
 		
 		rm(readAligned.dups, readsRanges, alignedL)
 		gc()
@@ -83,7 +91,8 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 			else
 			{
 			   readAligned.nodups <- readAligned(paste(lanesPath,"/",fileNames[index],sep=""), paste(fileNames[index], extension, sep=""), type=aligner, filter=uniqueFilter(withSread = FALSE))
-			   save(readAligned.nodups, file=paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"nodups",".rda",sep=""))
+			   if(writeAccess == 0)
+				save(readAligned.nodups, file=paste(lanesPath,"/",fileNames[index],"/",fileNames[index],"nodups",".rda",sep=""))
 			}
 
 			chr <- chromosome(readAligned.nodups)
@@ -91,7 +100,10 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 			alignedL <- do.call(RangesList, readsRanges)
 		
 			countTables <- lapply(overlap(alignedL, TSSL), as.table)
-			readCountsNoDuplications[, index] <- unlist(countTables)
+			for(chromosomeIndex in 1 : length(namesOnEachChromosome))
+			{
+				readCountsNoDuplications[namesOnEachChromosome[[chromosomeIndex]],index] <- countTables[[chromosomeIndex]]	
+			}
 			
 			rm(readAligned.nodups, readsRanges, alignedL)
 			gc()
