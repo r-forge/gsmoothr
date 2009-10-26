@@ -44,7 +44,7 @@ laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstrea
 		}
 		
 		writeAccess <- file.access(paste(lanesPath,"/",fileNames[index]), 2)
-		cat("Warning : Unable to write to directory ", paste(lanesPath, fileNames[index], sep = "/"), ". Can't save alignment in .rda file or write out quality reports.")
+		cat("Warning : Unable to write to directory ", paste(lanesPath, fileNames[index], sep = "/"), ". Can't save alignment in .rda file or write out quality reports.\n")
 		
 		if(doQuality == TRUE && writeAccess == 0)
 		{
