@@ -74,11 +74,6 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, de
 	}
 	else
 	{
-		if( upStream < 0 ) {
-			warning("Making 'upStream' a positive number.")
-			upStream <- abs(upStream)
-		}
-	
 		pos <- rep(NA,nrow(coordinatesTable))
 		pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
 		pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
@@ -132,13 +127,6 @@ setMethodS3("blocksStats", "default", function(cs, ndf, coordinatesTable, design
 	}
 	else
 	{	
-	
-		if( upStream < 0 ) 
-		{
-			warning("Making 'upStream' a positive number.")
-			upStream <- abs(upStream)
-		}
-	
 		pos <- rep(NA,nrow(coordinatesTable))
 		pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
 		pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]

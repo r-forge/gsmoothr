@@ -6,7 +6,7 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, ...)
+binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,7 @@ binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", 
   \item{cols}{vector of colours}
   \item{lwd}{line width (either scalar or vector)}
   \item{lty}{line type (either scalar or vector)}
+  \item{verbose}{Print details of processing.}
   \item{...}{further arguments to send to \code{bxp}}
 }
 \details{
