@@ -6,7 +6,7 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, verbose = FALSE, ...)
+binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,6 +25,8 @@ binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", 
 If \code{plotType="line"}, a line is plotted for each bin across the promoter.
   
 If \code{plotType="heatmap"}, a series of bins are plotted as a heatmap.  This can be useful to display a larger number of bins.
+
+If \code{plotType="terrain"}, a series of bins are plotted as a 3d-terrain map.  This can be useful to display a larger number of bins.
 
 The option \code{plotType="boxplot"} is really only suitable for 1- or 2-group plots.  In this case, instead of plotting the summarized data, it plots the whole distribution of signal across the whole promoter.
 }

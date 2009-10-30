@@ -1,4 +1,4 @@
-binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, verbose=FALSE, ...) {
+binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, verbose=FALSE, ...) {
 
   plotType <- match.arg(plotType)
   
@@ -32,8 +32,7 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 		label[[index]] <- " Factor:"
   }
   breaks <- lapply(orderingList, .makeBins)
-  str(breaks)
-  if( plotType %in% c("line","heatmap")) {
+  if( plotType %in% c("line","heatmap","terrain")) {
     intensScores <- array(NA,dim=c(ncol(dataMatrix), ncol(lookupTable), nbins),
 	                      dimnames=list(colnames(dataMatrix),colnames(lookupTable),NULL))
   } else {
@@ -41,20 +40,26 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	for(i in 1:length(intensScores))
 		intensScores[[i]] <- vector("list",ifelse(length(orderingList == 1), length(levels(breaks[[1]][["intervals"]])), length(levels(breaks[[i]][["intervals"]]))))
   }
+    if(verbose == TRUE)
+	{
+		if(length(orderingList) == 1)
+		{
+			if (verbose) cat(names(orderingList)[1],": ",sep="")
+			cutLevels <- levels( breaks[[1]][["intervals"]] )
+		} else {
+			if (verbose) cat(names(orderingList)[i],": ",sep="")
+			cutLevels <- levels( breaks[[i]][["intervals"]] )
+		}
+	}
 	  
   for(i in 1:ncol(dataMatrix)) {
-
+  
 	if(length(orderingList) == 1)
-	{    if(verbose == TRUE)
-		{
-			cat(names(orderingList)[1],": ",sep="")
-		}
+	{
+		if (verbose) cat(names(orderingList)[1],": ",sep="")
 		cutLevels <- levels( breaks[[1]][["intervals"]] )
 	} else {
-		if(verbose == TRUE)
-		{
-			cat(names(orderingList)[i],": ",sep="")
-		}
+		if (verbose) cat(names(orderingList)[i],": ",sep="")
 		cutLevels <- levels( breaks[[i]][["intervals"]] )
 	}
 	
@@ -66,7 +71,7 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	    } else {
 	      lookupTableSubset <- lookupTable[breaks[[i]][["intervals"]]==level, ]
 	    }
-	  if( plotType %in% c("line","heatmap")) {
+	  if( plotType %in% c("line","heatmap","terrain")) {
 	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=TRUE)	
       } else {
 		d <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, returnMatrix=TRUE,removeZeros=TRUE)
@@ -78,8 +83,8 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
   xval <- as.numeric(colnames(lookupTable))
   
   for(i in 1:ncol(dataMatrix)) {
-    if( plotType %in% c("line","heatmap"))
-      rng <- range(intensScores[i,,], na.rm=TRUE)
+    if( plotType %in% c("line","heatmap","terrain"))
+      rng <- range(intensScores, na.rm=TRUE)
 	  
   if(plotType=="boxplot") {
 	iS <- intensScores[[i]]
@@ -101,14 +106,14 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 		  par(mai=c(1.02,0.05,0.82,0))
 		  plot.new()
 		  legend(x="top", title ="Line Colours", col=cols, lty = 1, legend=cutLevels)
-		  print(cols)
+		  if (verbose) print(cols)
 		  if(length(orderingList) == 1)
 		  {
 			intervals <- breaks[[1]][["intervals"]] 
 		  } else {
 			intervals <- breaks[[i]][["intervals"]]
 		  }
-		  print(intervals)
+		  if (verbose) print(intervals)
 		  par(oma = c(0, 0, 2, 0))
 		  mtext(titName, line = 0.5, outer = TRUE)
 	} else if(plotType=="heatmap") {
@@ -129,7 +134,17 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 		  plot(x=breakpoints,y=0:nbins, type="l", yaxt="n", lwd=3,xlab="log2 Expression", yaxs="i")
 		  par(oma = c(0, 0, 2, 0))
 		  mtext(titName, line = 0, outer = TRUE)
+		} else if(plotType=="terrain") {
+		  layout(1)
+		  par(oma = c(0, 0, 2, 0))
+  		  dm.avg <- (dm[-1, -1] + dm[-1, -(ncol(dm) - 1)] +
+             		dm[-(nrow(dm) -1), -1] + dm[-(nrow(dm) -1), -(ncol(dm) - 1)]) / 4
+
+  		  this.cols = cols[cut(dm.avg, breaks = seq(rng[1], rng[2], length.out=length(cols)), include.lowest = T)] 
+		  persp(xval, 1:nbins, dm, xlab="Position relative to TSS", yaxt="n", ylab="Bin", col=this.cols, zlim=rng, theta=-25, phi=20, d=1.5, border=NA, ticktype="detailed", zlab="Signal")
+		  mtext(titName, line = 0, outer = TRUE)
 		}
+
 	  }
 	  invisible(intensScores)
     }
