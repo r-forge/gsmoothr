@@ -54,14 +54,16 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	}
 	  
   for(i in 1:ncol(dataMatrix)) {
-  
-	if(length(orderingList) == 1)
+    if(verbose == TRUE)
 	{
-		cat(names(orderingList)[1],": ",sep="")
-		cutLevels <- levels( breaks[[1]][["intervals"]] )
-	} else {
-		cat(names(orderingList)[i],": ",sep="")
-		cutLevels <- levels( breaks[[i]][["intervals"]] )
+		if(length(orderingList) == 1)
+		{
+			cat(names(orderingList)[1],": ",sep="")
+			cutLevels <- levels( breaks[[1]][["intervals"]] )
+		} else {
+			cat(names(orderingList)[i],": ",sep="")
+			cutLevels <- levels( breaks[[i]][["intervals"]] )
+		}
 	}
 	
 	for(j in 1:length(cutLevels)){
