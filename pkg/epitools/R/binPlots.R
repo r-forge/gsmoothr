@@ -41,17 +41,6 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	for(i in 1:length(intensScores))
 		intensScores[[i]] <- vector("list",ifelse(length(orderingList == 1), length(levels(breaks[[1]][["intervals"]])), length(levels(breaks[[i]][["intervals"]]))))
   }
-    if(verbose == TRUE)
-	{
-		if(length(orderingList) == 1)
-		{
-			cat(names(orderingList)[1],": ",sep="")
-			cutLevels <- levels( breaks[[1]][["intervals"]] )
-		} else {
-			cat(names(orderingList)[i],": ",sep="")
-			cutLevels <- levels( breaks[[i]][["intervals"]] )
-		}
-	}
 	  
   for(i in 1:ncol(dataMatrix)) {
 
