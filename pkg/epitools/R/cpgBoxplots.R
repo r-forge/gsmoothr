@@ -42,7 +42,7 @@
   invisible(bp)
 }
 
-createBins <- function(u, nBins) {
+.createBins <- function(u, nBins) {
 	q<-unique(quantile(u,prob=(0:nBins)/nBins))
 	q[1] <- q[1]-.000000001
 	n <- length(q)
@@ -130,7 +130,7 @@ setMethodS3("cpgBoxplots", "AffymetrixCelSet", function(this, ..., samples=c(1,2
   acc <- AromaCellCpgFile$byChipType(getChipType(cdf))
   cpgDens <- acc[indices,1,drop=TRUE]
   print(summary(cpgDens))
-  bins <- createBins(cpgDens, nBins)
+  bins <- .createBins(cpgDens, nBins)
   verbose && exit(verbose);
 
   .cpgBoxplots(dm, bins, gcContent, nBins, calcDiff, pdfFile, mfrow, col, ylim, gcCount, cb, sampleNames)												 
@@ -182,7 +182,7 @@ setMethodS3("cpgBoxplots", "default", function(this, ndfTable, ..., samples=c(1,
   verbose && exit(verbose)
 
   densities <- cpgDensityCalc(ndfTable, 300)
-  bins <- createBins(densities, nBins) 	
+  bins <- .createBins(densities, nBins) 	
   
   sampleNames <- colnames(this)[samples]
   

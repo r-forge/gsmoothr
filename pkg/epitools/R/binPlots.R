@@ -2,8 +2,12 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 
   plotType <- match.arg(plotType)
   
-  if(!length(orderingList) == ncol(dataMatrix) && !length(orderingList) == 1)
-		stop("orderingList must be either length 1 or as long as the number of columns in dataMatrix.")
+  if(!length(orderingList) == ncol(dataMatrix)) {
+    if (!length(orderingList) == 1)
+      stop("orderingList must be either length 1 or as long as the number of columns in dataMatrix.")
+      orderingIndex <- rep(1, ncol(dataMatrix))
+  } else orderingIndex <- 1:ncol(dataMatrix)
+
   
   if( is.null(cols) ) {
     require(gplots)
@@ -38,39 +42,19 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
   } else {
     intensScores <- vector("list",ncol(dataMatrix))
 	for(i in 1:length(intensScores))
-		intensScores[[i]] <- vector("list",ifelse(length(orderingList == 1), length(levels(breaks[[1]][["intervals"]])), length(levels(breaks[[i]][["intervals"]]))))
+		intensScores[[i]] <- vector("list", length(levels(breaks[[orderingIndex[i]]][["intervals"]])))
   }
-    if(verbose == TRUE)
-	{
-		if(length(orderingList) == 1)
-		{
-			if (verbose) cat(names(orderingList)[1],": ",sep="")
-			cutLevels <- levels( breaks[[1]][["intervals"]] )
-		} else {
-			if (verbose) cat(names(orderingList)[i],": ",sep="")
-			cutLevels <- levels( breaks[[i]][["intervals"]] )
-		}
-	}
-	  
+
+  xval <- as.numeric(colnames(lookupTable))
+
   for(i in 1:ncol(dataMatrix)) {
-  
-	if(length(orderingList) == 1)
-	{
-		if (verbose) cat(names(orderingList)[1],": ",sep="")
-		cutLevels <- levels( breaks[[1]][["intervals"]] )
-	} else {
-		if (verbose) cat(names(orderingList)[i],": ",sep="")
-		cutLevels <- levels( breaks[[i]][["intervals"]] )
-	}
+	if (verbose) cat(names(orderingList)[orderingIndex[i]],": ",sep="")
+	cutLevels <- levels( breaks[[orderingIndex[i]]][["intervals"]] )
+
 	
 	for(j in 1:length(cutLevels)){
 		level <- cutLevels[j]
-	    if(length(orderingList) == 1)
-	    {
-	      lookupTableSubset <- lookupTable[breaks[[1]][["intervals"]]==level, ]
-	    } else {
-	      lookupTableSubset <- lookupTable[breaks[[i]][["intervals"]]==level, ]
-	    }
+	    lookupTableSubset <- lookupTable[breaks[[orderingIndex[i]]][["intervals"]]==level, ]
 	  if( plotType %in% c("line","heatmap","terrain")) {
 	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=TRUE)	
       } else {
@@ -79,12 +63,14 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	  }
 	}
   }
-  
-  xval <- as.numeric(colnames(lookupTable))
-  
-  for(i in 1:ncol(dataMatrix)) {
+
     if( plotType %in% c("line","heatmap","terrain"))
       rng <- range(intensScores, na.rm=TRUE)
+
+
+  for(i in 1:ncol(dataMatrix)) {
+  cutLevels <- levels( breaks[[orderingIndex[i]]][["intervals"]] )
+
 	  
   if(plotType=="boxplot") {
 	iS <- intensScores[[i]]
@@ -97,24 +83,19 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	}
   } else {
 	dm <- intensScores[i,,]
-	titName <- paste("Signal:", colnames(dataMatrix)[i], ifelse(length(orderingList) == 1, label[1], label[i]), ifelse(length(orderingList) == 1, names(orderingList)[1], names(orderingList)[i]), sep="")
+	titName <- paste("Signal:", colnames(dataMatrix)[i], label[orderingIndex[i]], names(orderingList)[orderingIndex[i]], sep="")
 	if(plotType=="line")
 	{
 		  layout(rbind(c(1, 2)), widths=c(3,2))
+		  par(oma = c(0, 0, 2, 0))
 		  par(mai=c(1.02,0.90,0.82,0))
 		  matplot(xval,dm,type="l",col=cols,lty=lty,lwd=lwd,xlab="Position relative to TSS",ylab="Signal",ylim=rng)
 		  par(mai=c(1.02,0.05,0.82,0))
 		  plot.new()
 		  legend(x="top", title ="Line Colours", col=cols, lty = 1, legend=cutLevels)
 		  if (verbose) print(cols)
-		  if(length(orderingList) == 1)
-		  {
-			intervals <- breaks[[1]][["intervals"]] 
-		  } else {
-			intervals <- breaks[[i]][["intervals"]]
-		  }
+		  intervals <- breaks[[orderingIndex[i]]][["intervals"]]
 		  if (verbose) print(intervals)
-		  par(oma = c(0, 0, 2, 0))
 		  mtext(titName, line = 0.5, outer = TRUE)
 	} else if(plotType=="heatmap") {
 		  layout(rbind(c(1,2,3)), widths=c(1,3,1))
@@ -125,12 +106,7 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 		  par(mai=c(1.02,0.05,0.82,0.05))
 		  image(xval,1:nbins,dm,xlab="Position relative to TSS", yaxt="n", ylab="Bin",col=cols,zlim=rng)
 		  par(mai=c(1.02,0.05,0.82,0.50))
-		  if(length(orderingList) == 1)
-		  {
-			breakpoints <- breaks[[1]][["breakpoints"]] 
-		  } else {
-			breakpoints <- breaks[[i]][["breakpoints"]]
-		  }
+		  breakpoints <- breaks[[orderingIndex[i]]][["breakpoints"]]
 		  plot(x=breakpoints,y=0:nbins, type="l", yaxt="n", lwd=3,xlab="log2 Expression", yaxs="i")
 		  par(oma = c(0, 0, 2, 0))
 		  mtext(titName, line = 0, outer = TRUE)
