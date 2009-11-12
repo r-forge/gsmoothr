@@ -1,6 +1,5 @@
 laneBlocksCounts <- function(lanesPath, TSSDataTable, upstream = 1000, downstream = 1000, removeDuplications=FALSE, doQuality=FALSE, aligner="Bowtie")
 {
-	require(epitools)
 	require(IRanges)
 	require(ShortRead)
 	
