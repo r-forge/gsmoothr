@@ -28,11 +28,13 @@
 	if (calcDiff) {
     count <- count+1
 	  bp[[count]] <- boxplot( dm[w,1]-dm[w,2] ~ bins[w], xlim=c(0,actualNBins),ylim=ylim,col=col,main=main,las=2,cex.axis=.8,cex.main=.9)
+    names(bp) <- paste(colnames(dm), collapse="-")
 	} else {
     count <- count+1
     bp[[count]] <- boxplot( dm[w,1] ~ bins[w], at=(1:actualNBins)/2, boxwex=.4,xlim=c(0,actualNBins),ylim=ylim,col=col[1],main=main,las=2,cex.axis=.8,cex.main=.9)
     count <- count+1
     bp[[count]] <- boxplot( dm[w,2] ~ bins[w], at=((actualNBins+1):(actualNBins*2))/2,boxwex=.4, main="",col=col[2],add=TRUE,las=2,cex.axis=.8)
+    names(bp) <- colnames(dm)
 	}
   }
   
