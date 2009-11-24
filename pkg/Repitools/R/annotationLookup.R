@@ -73,6 +73,9 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 	if (!is.null(rownames(annotation))) {
 		names(annot$indexes) <- annotation$name
 		names(annot$offsets) <- annotation$name
+	} else {
+		names(annot$indexes) <- rownames(annotation)
+		names(annot$offsets) <- rownames(annotation)
 	}
 	return(annot)
 	#returns $indexes = a list for each annotation entry with the indexes of the probes within the block
@@ -100,7 +103,11 @@ annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) 
 	if (!is.null(rownames(annotation))) {
 		names(annot$indexes) <- annotation$name
 		names(annot$offsets) <- annotation$name
+	} else {
+		names(annot$indexes) <- rownames(annotation)
+		names(annot$offsets) <- rownames(annotation)
 	}
+
 	return(annot)
 }
 

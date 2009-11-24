@@ -6,18 +6,19 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, verbose = FALSE, ...)
+binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, symmScale = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
-  \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{dataTable}}
+  \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{lookupTable}}
   \item{plotType}{type of plot}
   \item{nbins}{number of bins}
   \item{cols}{vector of colours}
   \item{lwd}{line width (either scalar or vector)}
   \item{lty}{line type (either scalar or vector)}
+  \item{symmScale}{should the scale on plots be symmetrical ie centred around 0}
   \item{verbose}{Print details of processing.}
   \item{...}{further arguments to send to \code{bxp}}
 }

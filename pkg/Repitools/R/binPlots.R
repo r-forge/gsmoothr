@@ -1,4 +1,4 @@
-binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, verbose=FALSE, ...) {
+binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, symmScale=FALSE, verbose=FALSE, ...) {
 
   plotType <- match.arg(plotType)
   
@@ -64,9 +64,10 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	}
   }
 
-    if( plotType %in% c("line","heatmap","terrain"))
+    if( plotType %in% c("line","heatmap","terrain")) {
       rng <- range(intensScores, na.rm=TRUE)
-
+      if (symmScale) rng <- c(-max(abs(rng)),max(abs(rng)))
+    }
 
   for(i in 1:ncol(dataMatrix)) {
   cutLevels <- levels( breaks[[orderingIndex[i]]][["intervals"]] )
