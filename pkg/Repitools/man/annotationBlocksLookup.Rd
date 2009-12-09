@@ -5,12 +5,13 @@
 Starting from a table of genome locations for probes (see \code{probes} below) and a table of regions of interest (see \code{annotation} below), this procedure forms a list structure that contains the indices to map from one to the other.
 }
 \usage{
-annotationBlocksLookup(probes, annotation, probeIndex = NULL)
+annotationBlocksLookup(probes, annotation, probeIndex = NULL, verbose=TRUE)
 }
 \arguments{
   \item{probes}{probe genomic locations, a \code{data.frame} with required elements \code{chr} (character) and \code{position} (integer) and optional element \code{strand} ("+" or "-")}
   \item{annotation}{a \code{data.frame} with required elements \code{chr} (character),  \code{start} (integer), \code{end} (integer) and optional elements \code{strand} ("+" or "-") and \code{name} (character)}
   \item{probeIndex}{a probe index, default \code{NULL}}
+  \item{verbose}{whether to print progress to screen}
 }
 \details{
 Strandedness is dealt with as follows: If \code{annotation} contains \code{strand} information, \code{probes} must contain \code{strand} information as well. If \code{annotation} does not contain \code{strand} information, strandedness is ignored even if \code{probes} contains strand information. For memory efficiency, the actual mapping between probes is done in chunks of 10 megabases.

@@ -5,7 +5,7 @@
 Starting from a table of genome locations for probes (see \code{probes} below) and a table of TSSs for genes (see \code{annotation} below), this procedure forms a list structure that contains the indices to map from one to the other.
 }
 \usage{
-annotationLookup(probes, annotation, bpUp, bpDown, probeIndex = NULL)
+annotationLookup(probes, annotation, bpUp, bpDown, probeIndex = NULL, verbose=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,7 @@ annotationLookup(probes, annotation, bpUp, bpDown, probeIndex = NULL)
   \item{bpUp}{The number of bases upstream to look}
   \item{bpDown}{The number of bases downstream to look}
   \item{probeIndex}{a probe index, default \code{NULL}}
+  \item{verbose}{whether to print progress to screen}
 }
 \details{
 This function is a wrapper for the generic function \code{annotationBlocksLookup} which can handle annotations of varying sizes. \code{annotationLookup} is appropriate where you wish to map probes that are within a fixed distance of points of annotation e.g gene transcription start sites.

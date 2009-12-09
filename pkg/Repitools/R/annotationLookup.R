@@ -1,4 +1,4 @@
-annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
+annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=TRUE) {
 #probes = dataframe of $chr, $position and $strand ("+" or "-")
 #annotation = dataframe of $chr, $start, $end, $strand ("+" or "-") and $name or rownames = annotation name
 
@@ -57,7 +57,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 	annot = list(indexes=vector(mode='list', length=nrow(annotation)), offsets=vector(mode='list', length=nrow(annotation)))
 	for (i in annotChr) {
 		thisChr = annotationStrandChr[i[1]]
-		cat("Processing",thisChr,"\n")
+		if (verbose) cat("Processing",thisChr,"\n")
 
 		#Grab the subset of probes on that chromosome
 		tempIndex = which(probesStrandChr==thisChr)
@@ -83,7 +83,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL) {
 	
 }
 
-annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) {
+annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL, verbose=TRUE) {
 #probes = dataframe of $chr and $position
 #annotation = dataframe of $chr, $position, $strand ("+" or "-") and $name or rownames = annotation name
 #if annotation has no strand, assume are + strand
@@ -92,7 +92,7 @@ annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) 
                                      start=annotation$position+ifelse(annotation$strand=="+",-bpUp, +bpUp),
                                      end=annotation$position+ifelse(annotation$strand=="+",+bpDown, -bpDown),
                                      name=rownames(annotation), stringsAsFactors=F)
-	annot <- annotationBlocksLookup(probes, annotationTemp, probeIndex)
+	annot <- annotationBlocksLookup(probes, annotationTemp, probeIndex, verbose)
 
 	#adjust offset by bpUp & bpDown
 	adjustOffset <- function(offsets, strand, bpUp, bpDown) {
@@ -109,5 +109,44 @@ annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL) 
 	}
 
 	return(annot)
+}
+
+
+annotationBlocksCounts <- function(rs, annotation, seqLen=NULL) {
+	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
+	anno.counts <- matrix(as.integer(NA), nrow=nrow(annotation), ncol=length(rs), dimnames=list(annotation$name, names(rs)))
+	anno.ranges <- IRanges(start=annotation$start, end=annotation$end)
+	
+	for (i in 1:length(rs)) {
+		if (!class(rs[[i]][[1]])=="IRanges") {
+			if (is.null(seqLen)) stop("If rs has not been extended, seqLen must be supplied")
+			rs[[i]] <- extendReads(rs[[i]], seqLen=seqLen)
+		}
+
+		for (chr in unique(annotation$chr)) {
+			which.anno <- annotation$chr==chr
+			if (is.null(rs[[i]][[chr]])) anno.counts[which.anno] <- 0 #no counts on that chr
+			else anno.counts[which.anno,i] <- as.table(findOverlaps(anno.ranges[which.anno], rs[[i]][[chr]]))
+		}
+	}
+	anno.counts
+
+}
+
+annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL) {
+	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
+
+	anno.ranges <- IRanges(start=
+                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
+                               end=
+                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp))
+
+	anno <- data.frame(chr=annotation$chr,
+                           start=
+                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
+                           end=
+                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
+                           name=annotation$name)
+	annotationBlocksCounts(rs, anno, seqLen)
 }
 
