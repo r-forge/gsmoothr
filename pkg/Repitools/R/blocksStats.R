@@ -112,7 +112,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 	}
 
 	if (total.lib.size) {
-		lib.sizes <- IRanges::as.list(BSgenome::gdapply(rs, function(x) length(unlist(x))))
+		lib.sizes <- IRanges::as.list(BSgenome::gdapply(cs, function(x) length(unlist(x))))
 		lib.sizes <- lapply(lib.sizes, IRanges::as.list)
 		lib.sizes <- sapply(lib.sizes, function(x) sum(unlist(x)))
 	} else	lib.sizes <- colSums(dm)
