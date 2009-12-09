@@ -126,7 +126,7 @@ annotationBlocksCounts <- function(rs, annotation, seqLen=NULL) {
 		for (chr in unique(annotation$chr)) {
 			which.anno <- annotation$chr==chr
 			if (is.null(rs[[i]][[chr]])) anno.counts[which.anno] <- 0 #no counts on that chr
-			else anno.counts[which.anno,i] <- as.table(findOverlaps(anno.ranges[which.anno], rs[[i]][[chr]]))
+			else anno.counts[which.anno,i] <- IRanges::as.table(findOverlaps(anno.ranges[which.anno], rs[[i]][[chr]]))
 		}
 	}
 	anno.counts
@@ -135,11 +135,6 @@ annotationBlocksCounts <- function(rs, annotation, seqLen=NULL) {
 
 annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL) {
 	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
-
-	anno.ranges <- IRanges(start=
-                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
-                               end=
-                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp))
 
 	anno <- data.frame(chr=annotation$chr,
                            start=

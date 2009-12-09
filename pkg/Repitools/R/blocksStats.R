@@ -111,8 +111,11 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 		dm <- annotationCounts(cs, coordinatesTable, upStream, downStream, seqLen)
 	}
 
-	if (total.lib.size) lib.sizes <-  sapply(cs, function(x) sum(sapply(x, function(y) length(unlist(y))))) else
-		lib.sizes <- colSums(dm)
+	if (total.lib.size) {
+		lib.sizes <- IRanges::as.list(BSgenome::gdapply(rs, function(x) length(unlist(x))))
+		lib.sizes <- lapply(lib.sizes, IRanges::as.list)
+		lib.sizes <- sapply(lib.sizes, function(x) sum(unlist(x)))
+	} else	lib.sizes <- colSums(dm)
 	dmRes <- cbind(coordinatesTable, dm)
 	for (i in 1:ncol(design)) {
 		if (verbose) cat("Processing column",i,"of design matrix\n")
