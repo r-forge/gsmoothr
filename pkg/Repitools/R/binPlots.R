@@ -1,4 +1,25 @@
-binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, symmScale=FALSE, verbose=FALSE, ...) {
+setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, seqLen=NULL, verbose=FALSE, ...) {
+
+	blockPos <- seq.int(-upStream, downStream, by)
+	if (verbose) cat("made blockPos\n")
+	annoBlocks <- data.frame(chr=rep(coordinatesTable$chr, each=length(blockPos)),
+                                 start=rep(coordinatesTable$position-bw, each=length(blockPos)),
+                                 end=rep(coordinatesTable$position+bw, each=length(blockPos)),
+                                 strand=rep(coordinatesTable$strand, each=length(blockPos)))
+	annoBlocks$start[annoBlocks$strand=="+"] <- annoBlocks$start[annoBlocks$strand=="+"] + blockPos
+	annoBlocks$end[annoBlocks$strand=="+"] <- annoBlocks$end[annoBlocks$strand=="+"] + blockPos
+	annoBlocks$start[annoBlocks$strand=="-"] <- annoBlocks$start[annoBlocks$strand=="-"] - blockPos
+	annoBlocks$end[annoBlocks$strand=="-"] <- annoBlocks$end[annoBlocks$strand=="-"] - blockPos
+	if (verbose) cat("made annoBlocks\n")
+	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen)
+	if (verbose) cat("made annoCounts\n")
+	annoTable <- matrix(1:nrow(annoCounts), byrow=TRUE, ncol=length(blockPos), nrow=nrow(coordinatesTable), dimnames=list(NULL, blockPos))
+	if (verbose) cat("made annoTable\n")
+	binPlots(annoCounts, annoTable, ...)
+})
+
+
+setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, symmScale=FALSE, verbose=FALSE, ...) {
 
   plotType <- match.arg(plotType)
   
@@ -125,4 +146,6 @@ binPlots <- function(dataMatrix, lookupTable, orderingList, plotType=c("line","h
 	  }
 	  invisible(intensScores)
     }
-}
+})
+
+

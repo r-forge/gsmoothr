@@ -135,7 +135,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 })
 
 
-setMethodS3("blocksStats", "default", function(cs, ndf, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
+setMethodS3("blocksStats", "matrix", function(cs, ndf, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
 {
 	if( nrow(design) != ncol(cs) )
 		stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix.")

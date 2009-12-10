@@ -1,16 +1,19 @@
 \name{binPlots}
 \alias{binPlots}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\alias{binPlots.GenomeDataList}
+\alias{binPlots.matrix}
 \title{Create line plots of averaged signal across a promoter}
 \description{
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, symmScale = FALSE, verbose = FALSE, ...)
+\method{binPlots}{GenomeDataList}(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, seqLen=NULL, verbose=FALSE, ...)
+\method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, symmScale = FALSE, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
+  \item{rs}{\code{GenomeDataList} of sequencing data to use}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
   \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{lookupTable}}
   \item{plotType}{type of plot}
@@ -20,6 +23,12 @@ binPlots(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", 
   \item{lty}{line type (either scalar or vector)}
   \item{symmScale}{should the scale on plots be symmetrical ie centred around 0}
   \item{verbose}{Print details of processing.}
+  \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{position}, \code{strand}}
+  \item{upStream}{number of bases upstream to plot}
+  \item{downStream}{number of bases upstream to plot}
+  \item{by}{how many bases between data points}
+  \item{bw}{how many bases up and downstream to be counted}
+  \item{seqLen}{If sequencing reads need to be extended, the fragment size to be used}
   \item{...}{further arguments to send to \code{bxp}}
 }
 \details{

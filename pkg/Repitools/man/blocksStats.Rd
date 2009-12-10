@@ -2,7 +2,7 @@
 \alias{blocksStats}
 \alias{blocksStats.AffymetrixCelSet}
 \alias{blocksStats.GenomeDataList}
-\alias{blocksStats.default}
+\alias{blocksStats.matrix}
 \title{A routine to calculate statistics for regions in the genome}
 \description{
 For each region of interest, this routine interrogates probes for either a high level of absolute signal or a change in signal for some specified contrast (i.e. difference) of interest.  Regions can be surroundings of TSSs, or can be a table of user - specified regions. The function determines if it should calculate around the TSSs or in the user's regions of interest based on whether the variable \code{regionsOfInterestTable} is NULL. \code{regionsOfInterestTable} and \code{geneCoords} cannot both be given to the function.
@@ -10,7 +10,7 @@ For each region of interest, this routine interrogates probes for either a high 
 \usage{
 \method{blocksStats}{AffymetrixCelSet}(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust = TRUE, useAsRegions=FALSE, ...)
 \method{blocksStats}{GenomeDataList}(cs, coordinatesTable, design, upStream = 0, downStream = 2000, verbose=TRUE, useAsRegions = FALSE, seqLen = NULL, total.lib.size = TRUE, ...)
-\method{blocksStats}{default}(cs, ndf, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust = TRUE, useAsRegions=FALSE, ...)
+\method{blocksStats}{matrix}(cs, ndf, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust = TRUE, useAsRegions=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
