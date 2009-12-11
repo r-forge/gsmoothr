@@ -2,44 +2,19 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 #probes = dataframe of $chr, $position and $strand ("+" or "-")
 #annotation = dataframe of $chr, $start, $end, $strand ("+" or "-") and $name or rownames = annotation name
 
-	processChunk <- function(probePositions, annotation) {
-		#initialise return variables
-		numAnnot = nrow(annotation)
-		annotProbes = list(indexes=vector(mode='list', length=numAnnot), offsets=vector(mode='list', length=numAnnot))
-		if (is.null(probePositions)||(length(probePositions)==0)) return(annotProbes) #if no probes in this chunk return empty annotations	
-		chromosomeSize = max(probePositions)
-
-		#allocate vector of chromosome size
-		chromosomeLookup <- rep.int(NA, chromosomeSize) 
-
-		#set positions of probes
-		chromosomeLookup[probePositions] = names(probePositions)
-
-		for (i in 1:numAnnot) {
-			tempProbes = chromosomeLookup[annotation$start[i]:annotation$end[i]]
-			annotProbes$indexes[[i]] = as.integer(na.omit(tempProbes))
-			#adjust offsets if at start/end of a chromosome
-			annotProbes$offsets[[i]] = which(!is.na(tempProbes))
-		}
-		return(annotProbes)
-	}
 
 	processChromosome <- function(probePositions, annotation) {
 		numAnnot = nrow(annotation)
 		annotProbes = list(indexes=vector(mode='list', length=numAnnot), offsets=vector(mode='list', length=numAnnot))
 		if (length(probePositions)==0) return(annotProbes) #if no probes on this chromosome return empty annotations	
-		chromosomeSize = max(probePositions)
-    annotChunks = split(1:nrow(annotation), trunc(annotation$start/10000000)) #split into 10MB chunks of annotations
-    for (i in annotChunks) {
-      chunkRange = range(c(annotation$start[i], annotation$end[i]))
-      chunkPositions = probePositions[(probePositions>=chunkRange[1])&(probePositions<=chunkRange[2])]-chunkRange[1]+1
-      chunkAnnot = annotation[i,]
-      chunkAnnot$start = chunkAnnot$start-chunkRange[1]+1
-      chunkAnnot$end = chunkAnnot$end-chunkRange[1]+1
-		  tempAnnot = processChunk(chunkPositions, chunkAnnot)
-		  annotProbes$indexes[i] = tempAnnot$indexes
-		  annotProbes$offsets[i] = tempAnnot$offsets
-	  }
+		require(IRanges)
+		probes.IRanges <- IRanges(start=probePositions, width=1)
+		annotation.IRanges <- IRanges(start=annotation$start, end=annotation$end)
+		anno.overlaps <- findOverlaps(query=probes.IRanges, subject=annotation.IRanges)
+		anno.overlaps <- tapply(anno.overlaps@matchMatrix[,1], anno.overlaps@matchMatrix[,2], list)
+		annotProbes$indexes[as.integer(names(anno.overlaps))] <- anno.overlaps
+		annotProbes$offsets <- mapply(function(x ,y) probePositions[x]-y, annotProbes$indexes, annotation$start)
+		annotProbes$indexes <- lapply(annotProbes$indexes, function(x) as.integer(names(probePositions[x])))
 		return(annotProbes)
   }
 
@@ -52,6 +27,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 		probesStrandChr <- paste(probes$chr, probes$strand, sep="")
 		annotationStrandChr <- paste(annotation$chr, annotation$strand, sep="")
 	}
+
 	#split by strand AND chromosome simultaneously
 	annotChr = split(1:nrow(annotation), annotationStrandChr)
 	annot = list(indexes=vector(mode='list', length=nrow(annotation)), offsets=vector(mode='list', length=nrow(annotation)))
@@ -83,23 +59,22 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 	
 }
 
+
+
 annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL, verbose=TRUE) {
 #probes = dataframe of $chr and $position
 #annotation = dataframe of $chr, $position, $strand ("+" or "-") and $name or rownames = annotation name
 #if annotation has no strand, assume are + strand
 	if (is.null(annotation$strand)) annotation$strand <- "+"
 	annotationTemp <- data.frame(chr=annotation$chr, 
-                                     start=annotation$position+ifelse(annotation$strand=="+",-bpUp, +bpUp),
-                                     end=annotation$position+ifelse(annotation$strand=="+",+bpDown, -bpDown),
+                                     start=annotation$position+ifelse(annotation$strand=="+",-bpUp, -bpDown),
+                                     end=annotation$position+ifelse(annotation$strand=="+",+bpDown, +bpUp),
                                      name=rownames(annotation), stringsAsFactors=F)
 	annot <- annotationBlocksLookup(probes, annotationTemp, probeIndex, verbose)
 
-	#adjust offset by bpUp & bpDown
-	adjustOffset <- function(offsets, strand, bpUp, bpDown) {
-		if (strand=="+") return(offsets-bpUp) else return(-1*offsets+bpDown)
-	}
-#	annot$offsets = mapply(adjustOffset, annot$offsets, annotation$strand, MoreArgs=list(bpUp=bpUp, bpDown=bpDown))
-	annot$offsets = lapply(annot$offsets, function(x,bpUp) {return(x-bpUp-1)}, bpUp)
+	annot$offsets[annotation$strand=="+"] = lapply(annot$offsets[annotation$strand=="+"], function(x,bpOff) {return(x-bpOff)}, bpUp)
+	annot$offsets[annotation$strand=="-"] = lapply(annot$offsets[annotation$strand=="-"], function(x,bpOff) {return(rev(bpOff-x))}, bpDown)
+	annot$indexes[annotation$strand=="-"] = lapply(annot$indexes[annotation$strand=="-"], rev)
 	if (!is.null(rownames(annotation))) {
 		names(annot$indexes) <- annotation$name
 		names(annot$offsets) <- annotation$name

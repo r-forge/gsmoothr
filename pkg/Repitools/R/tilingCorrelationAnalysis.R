@@ -20,36 +20,29 @@
 
 
 makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
-
-	getProbesInWindow <- function(indexes, offsets, start, end) {
-	#indexes & offsets are integer vectors at this stage
-	#start & end are atomic integers - offset co-ordinates we are interested in
-		if (length(indexes) > 0) { 
-		  o <- which(offsets>=start & offsets<=end)
-		  if (length(o) > 0) {
-		    midpt <- (start+end)/2
-		    indexes <- indexes[o]
-			offsets <- offsets[o]
-			return(indexes[which.min( abs(offsets-midpt) )])
-		  }
-		}
-		return(integer())
-	}
-
 	lookupTable <- matrix(NA,nrow=length(indexes),ncol=length(starts))
 	colnames(lookupTable) <- (starts+ends)/2
 	rownames(lookupTable) <- names(indexes)
-	
-	for (i in 1:length(starts)) {
-		cat("Processing",starts[i],"to",ends[i],"\n")
-		for (j in 1:length(indexes)) {
-		  piw <- getProbesInWindow(indexes[[j]], offsets[[j]], starts[i], ends[i])
-		  if (length(piw)==1)
-		    lookupTable[j,i] = piw
-		}
+
+	ind <- unlist(indexes)
+	off <- unlist(offsets, use.names=FALSE)
+	genes <- unlist(mapply(rep, 1:length(indexes), sapply(indexes, length)))
+
+	off.IRanges <- IRanges(start=off, width=1)
+	o <- findOverlaps(query=off.IRanges, subject=IRanges(start=starts, end=ends))@matchMatrix
+	o <- tapply(o[,1], o[,2], list)
+
+	for (i in 1:length(o)) {
+		pos <- as.integer(names(o)[i])
+		genes.mid <- tapply(o[[i]], genes[o[[i]]], function(x, midpt) {
+			return(ind[x[which.min(abs(off[x]-midpt))]])
+		}, (starts[pos]+ends[pos])/2)
+		lookupTable[as.integer(names(genes.mid)),pos] <- genes.mid
 	}
 	return(lookupTable)
 }
+
+
 
 
 .scoreCorrelation <- function(lookup, intensities, correlateTo, minProbes=1, cor.method="pearson") {
