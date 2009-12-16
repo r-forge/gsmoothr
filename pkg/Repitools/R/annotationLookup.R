@@ -87,7 +87,7 @@ annotationLookup <- function(probes, annotation, bpUp, bpDown, probeIndex=NULL, 
 }
 
 
-annotationBlocksCounts <- function(rs, annotation, seqLen=NULL) {
+annotationBlocksCounts <- function(rs, annotation, seqLen=NULL, verbose=TRUE) {
 	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
 	anno.counts <- matrix(as.integer(NA), nrow=nrow(annotation), ncol=length(rs), dimnames=list(annotation$name, names(rs)))
 	anno.ranges <- IRanges(start=annotation$start, end=annotation$end)
@@ -97,18 +97,25 @@ annotationBlocksCounts <- function(rs, annotation, seqLen=NULL) {
 			if (is.null(seqLen)) stop("If rs has not been extended, seqLen must be supplied")
 			rs[[i]] <- extendReads(rs[[i]], seqLen=seqLen)
 		}
+    if(verbose)
+      cat(names(rs)[i], ":", sep="")
 
 		for (chr in unique(annotation$chr)) {
+      if(verbose)
+        cat(" ", chr, sep="")
 			which.anno <- annotation$chr==chr
 			if (is.null(rs[[i]][[chr]])) anno.counts[which.anno] <- 0 #no counts on that chr
 			else anno.counts[which.anno,i] <- IRanges::as.table(findOverlaps(anno.ranges[which.anno], rs[[i]][[chr]]))
 		}
+    if(verbose)
+      cat("\n")
 	}
 	anno.counts
 
 }
 
-annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL) {
+annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL, verbose=TRUE) {
+	require(chipseq)
 	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
 
 	anno <- data.frame(chr=annotation$chr,
@@ -117,6 +124,6 @@ annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL) {
                            end=
                         ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
                            name=annotation$name)
-	annotationBlocksCounts(rs, anno, seqLen)
+	annotationBlocksCounts(rs, anno, seqLen, verbose)
 }
 

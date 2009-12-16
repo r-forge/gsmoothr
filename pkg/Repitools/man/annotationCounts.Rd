@@ -5,7 +5,7 @@
 Counts the number of sequencing reads surrounding supplied annotations
 }
 \usage{
-annotationCounts(rs, annotation, bpUp, bpDown, seqLen = NULL)
+annotationCounts(rs, annotation, bpUp, bpDown, seqLen = NULL, verbose=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,7 @@ annotationCounts(rs, annotation, bpUp, bpDown, seqLen = NULL)
   \item{bpUp}{The number of bases upstream to look}
   \item{bpDown}{The number of bases downstream to look}
   \item{seqLen}{If sequencing reads need to be extended, the fragment size to be used}
+  \item{verbose}{logical, whether to print progress}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

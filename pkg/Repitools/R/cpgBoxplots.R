@@ -20,7 +20,7 @@
   for(j in gcContent) {
     w <- which( gcCount==j)
 	if( length(w)==0 )
-	  continue
+	  next
 	  
     title2 <- paste("[Probe G+C =",j,"]","Percentage of Probes:",round(length(w)/nrow(cb)*100,2))
 	main <- paste(title1,title2,sep="\n")
