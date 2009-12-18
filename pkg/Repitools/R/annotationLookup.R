@@ -31,10 +31,11 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 	#split by strand AND chromosome simultaneously
 	annotChr = split(1:nrow(annotation), annotationStrandChr)
 	annot = list(indexes=vector(mode='list', length=nrow(annotation)), offsets=vector(mode='list', length=nrow(annotation)))
+	if (verbose) cat("Processing mapping between probes and genes.\n")
+
 	for (i in annotChr) {
 		thisChr = annotationStrandChr[i[1]]
-		if (verbose) cat("Processing",thisChr,"\n")
-
+		
 		#Grab the subset of probes on that chromosome
 		tempIndex = which(probesStrandChr==thisChr)
 		tempProbes = probes$position[tempIndex]
@@ -53,6 +54,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 		names(annot$indexes) <- rownames(annotation)
 		names(annot$offsets) <- rownames(annotation)
 	}
+	if (verbose) cat("Mapping done.\n")
 	return(annot)
 	#returns $indexes = a list for each annotation entry with the indexes of the probes within the block
 	#	 $offsets = a list for each annotation entry with the offsets from the beginning of the block
@@ -120,9 +122,9 @@ annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL, verbose=
 
 	anno <- data.frame(chr=annotation$chr,
                            start=
-                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
+                        ifelse(annotation$strand=="+", annotation$start-bpUp, annotation$end-bpDown), 
                            end=
-                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
+                        ifelse(annotation$strand=="+", annotation$start+bpDown, annotation$end+bpUp),
                            name=annotation$name)
 	annotationBlocksCounts(rs, anno, seqLen, verbose)
 }

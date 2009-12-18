@@ -1,5 +1,5 @@
 .blocksStats <- function(diffs, coordinatesTable, design, upStream, downStream, verbose, robust=FALSE, minNRobust, adjustMethod, useAsRegions, annot)
-{	
+{       
   means <- tstats <- matrix(NA, nr=nrow(coordinatesTable), nc=ncol(diffs), dimnames=list(NULL,colnames(design)))
   df <- rep(0,nrow(coordinatesTable))
 
@@ -8,20 +8,20 @@
     vind <- unique(vind[!is.na(vind)])
     if( length(vind) < 2 )
       next
-	for(j in 1:ncol(diffs)) {
-	  if( robust & length(vind) >= minNRobust ) {
-	    require(MASS)
+        for(j in 1:ncol(diffs)) {
+          if( robust & length(vind) >= minNRobust ) {
+            require(MASS)
         rf <- summary(rlm(diffs[vind,j]~1))
         tstats[i,j] <- rf$coef[3]
-	    means[i,j] <- rf$coef[1]
+            means[i,j] <- rf$coef[1]
         df[i] <- rf$df[2]
-	  } else {
+          } else {
         tt <- t.test(diffs[vind,j])
         tstats[i,j] <- tt$statistic
-	    means[i,j] <- tt$estimate
+            means[i,j] <- tt$estimate
         df[i] <- tt$parameter
-	  }
-	}
+          }
+        }
   }
 
   pvals <- 2*pt(-abs(tstats),df)
@@ -33,14 +33,14 @@
   
   xDf <- data.frame(df=df, meandiff=means, tstats=tstats, pvals=pvals, adjpvals=adjpvals)
   if(useAsRegions == TRUE)
-	{
-		colnames(xDf)[1] <- "df"	
-	}
-	else
-	{
-		colnames(xDf)[1] <- paste("df",upStream,downStream,sep=".")
-	}
-	
+        {
+                colnames(xDf)[1] <- "df"        
+        }
+        else
+        {
+                colnames(xDf)[1] <- paste("df",upStream,downStream,sep=".")
+        }
+        
   if( ncol(xDf)==5 )
     colnames(xDf)[2:5] <- paste(c("meandiff","tstats","pvals","adjpvals"), gsub(".[1-9]$","",colnames(xDf)[2:5]), sep=".")
    
@@ -48,7 +48,7 @@
   cbind(coordinatesTable,xDf)
 }
 
-setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
+setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, annot, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
 {
 	require(aroma.affymetrix)
 
@@ -63,33 +63,12 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, de
   
   if(!all(c("chr", "name", "start", "end", "strand")  %in% colnames(coordinatesTable)))
 	stop("Incorrect column headings for coordinatesTable. Check documentation for details.")  
-	
+  
 	w <- which( rowSums(design != 0) > 0 )
 	cs <- extract(cs, w, verbose=verbose)
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
-
-	if(useAsRegions == TRUE)
-	{
-		annot <- annotationBlocksLookup(probePositions, coordinatesTable, verbose=verbose)
-	}
-	else
-	{
-		pos <- rep(NA,nrow(coordinatesTable))
-		pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
-		pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
-
-		genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, strand=coordinatesTable$strand, 
-								row.names=coordinatesTable$name, stringsAsFactors=FALSE)
-																										
-		# run lookup twice.  first to get a list of smaller list of probes to use
-		annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
-		pb <- unique(unlist(annot$indexes, use.names=FALSE))
-		probePositions <- probePositions[pb,]
-		annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
-	}
 	
-	ind <- probePositions$index
-	dmP <- extractMatrix(cs,cells=ind,verbose=verbose)
+	dmP <- extractMatrix(cs, verbose=verbose)
 	if(log2adjust == TRUE)
 	{
 		diffs <- log2(dmP) %*% design[w,]
@@ -99,10 +78,32 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, de
 		diffs <- dmP %*% design[w,]
 	}
 
+	if(is.null(annot))
+	{
+		if(useAsRegions == TRUE)
+		{
+			annot <- annotationBlocksLookup(probePositions, coordinatesTable, verbose=verbose)
+		}
+		else
+		{
+			pos <- rep(NA,nrow(coordinatesTable))
+			pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
+			pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
+
+			genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, strand=coordinatesTable$strand, 
+									row.names=coordinatesTable$name, stringsAsFactors=FALSE)
+																											
+			# run lookup twice.  first to get a list of smaller list of probes to use
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+			pb <- unique(unlist(annot$indexes, use.names=FALSE))
+			probePositions <- probePositions[pb,]
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+		}
+	}
+
 	return(.blocksStats(diffs, coordinatesTable, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, useAsRegions, annot))
   
-}
-)
+})
 
 setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, total.lib.size=TRUE, ...) {
 	if (verbose) cat("Generating table of counts\n")
@@ -120,13 +121,10 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 	for (i in 1:ncol(design)) {
 		if (verbose) cat("Processing column",i,"of design matrix\n")
 		stopifnot(sum(design[,i]==1)>0, sum(design[,i]==-1)>0, all(design[,i] %in% c(-1,0,1)))
-
 		require(edgeR)
 		d <- DGEList(counts=dm[,design[,i]!=0], group=as.character(design[design[,i]!=0,i]), lib.size=lib.sizes[design[,i]!=0])
-
 		d.disp <- estimateCommonDisp(d)
 		deD <- exactTest(d.disp, pair=c("-1","1"))
-
 		de <- topTags(deD, n=nrow(deD$table))@.Data[[1]]
 		colnames(de) <- paste(colnames(de), colnames(design)[i], sep="_")
 		dmRes <- merge(dmRes, de, all.x=TRUE, by.x="name", by.y="row.names")
@@ -135,7 +133,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 })
 
 
-setMethodS3("blocksStats", "matrix", function(cs, ndf, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
+setMethodS3("blocksStats", "matrix", function(cs, ndf, coordinatesTable, annot, design, upStream=0, downStream=2000, verbose=TRUE, robust=FALSE, minNRobust=10, adjustMethod="fdr", log2adjust=TRUE, useAsRegions=FALSE, ...)
 {
 	if( nrow(design) != ncol(cs) )
 		stop("The number of rows in the design matrix does not equal the number of columns in the probes data matrix.")
@@ -150,25 +148,29 @@ setMethodS3("blocksStats", "matrix", function(cs, ndf, coordinatesTable, design,
 	} else {
 		diffs <- cs %*% design[w,]
 	}
-	probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)
 	
-	if(useAsRegions == TRUE)
+	if(is.null(annot))
 	{
-		annot <- annotationBlocksLookup(probePositions, coordinatesTable)
-	}
-	else
-	{	
-		pos <- rep(NA,nrow(coordinatesTable))
-		pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
-		pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
-
-		genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, strand=coordinatesTable$strand, row.names=coordinatesTable$name, stringsAsFactors=FALSE)
+		probePositions <- data.frame(chr = ndf$chr, position = ndf$position, index = ndf$index, strand = ndf$strand, stringsAsFactors=FALSE)
 	
-		# run lookup twice.  first to get a list of smaller list of probes to use
-		annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
-		pb <- unique(unlist(annot$indexes, use.names=FALSE))
-		probePositions <- probePositions[pb,]
-		annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+		if(useAsRegions == TRUE)
+		{
+			annot <- annotationBlocksLookup(probePositions, coordinatesTable)
+		}
+		else
+		{	
+			pos <- rep(NA,nrow(coordinatesTable))
+			pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
+			pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
+	
+			genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, strand=coordinatesTable$strand, row.names=coordinatesTable$name, stringsAsFactors=FALSE)
+	
+			# run lookup twice.  first to get a list of smaller list of probes to use
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+			pb <- unique(unlist(annot$indexes, use.names=FALSE))
+			probePositions <- probePositions[pb,]
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+		}
 	}
 
 	return(.blocksStats(diffs, coordinatesTable, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, useAsRegions, annot))
