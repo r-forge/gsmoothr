@@ -122,9 +122,9 @@ annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL, verbose=
 
 	anno <- data.frame(chr=annotation$chr,
                            start=
-                        ifelse(annotation$strand=="+", annotation$start-bpUp, annotation$end-bpDown), 
+                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
                            end=
-                        ifelse(annotation$strand=="+", annotation$start+bpDown, annotation$end+bpUp),
+                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
                            name=annotation$name)
 	annotationBlocksCounts(rs, anno, seqLen, verbose)
 }
