@@ -3,13 +3,14 @@
 \title{Writes sequencing data out into a wiggle file}
 \description{Writes sequencing data out into a wiggle file}
 \usage{
-writeWig(rs.cov, filename, sample = 20, dropZero = TRUE, verbose = TRUE)
+writeWig(rs.cov, filename, sample = 20, dropZero = TRUE, normalise=1, verbose = TRUE)
 }
 \arguments{
   \item{rs.cov}{The data to be written, must be a \code{GenomeData} object which \code{coverage} has been called upon}
   \item{filename}{File to write out to - if ending in "gz", a gzipped is written out}
   \item{sample}{At what basepair resolution to sample the genome at}
   \item{dropZero}{Whether to write zero values to the wiggle file - TRUE saves diskspace}
+  \item{normalise}{Divide the coverage amount by this number - simple way to normalise to number of reads}
   \item{verbose}{Whether to write progress to screen}
 }
 \details{

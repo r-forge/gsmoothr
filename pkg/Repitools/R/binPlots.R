@@ -11,15 +11,15 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, upStrea
 	annoBlocks$start[annoBlocks$strand=="-"] <- annoBlocks$start[annoBlocks$strand=="-"] - blockPos
 	annoBlocks$end[annoBlocks$strand=="-"] <- annoBlocks$end[annoBlocks$strand=="-"] - blockPos
 	if (verbose) cat("made annoBlocks\n")
-	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen)
+	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen, verbose)
 	if (verbose) cat("made annoCounts\n")
 	annoTable <- matrix(1:nrow(annoCounts), byrow=TRUE, ncol=length(blockPos), nrow=nrow(coordinatesTable), dimnames=list(NULL, blockPos))
 	if (verbose) cat("made annoTable\n")
-	binPlots(annoCounts, annoTable, ...)
+	binPlots(annoCounts, annoTable, removeZeros=FALSE, ...)
 })
 
 
-setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, symmScale=FALSE, verbose=FALSE, ...) {
+setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, ...) {
 
   plotType <- match.arg(plotType)
   
@@ -77,15 +77,15 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 		level <- cutLevels[j]
 	    lookupTableSubset <- lookupTable[breaks[[orderingIndex[i]]][["intervals"]]==level, ]
 	  if( plotType %in% c("line","heatmap","terrain")) {
-	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=TRUE)	
+	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=removeZeros)	
       } else {
-		d <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, returnMatrix=TRUE,removeZeros=TRUE)
+		d <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, returnMatrix=TRUE,removeZeros=removeZeros)
 		intensScores[[i]][[j]] <- boxplot(as.data.frame(d), plot=FALSE)
 	  }
 	}
   }
 
-    if( plotType %in% c("line","heatmap","terrain")) {
+    if ( plotType %in% c("line","heatmap","terrain")) if (sameScale) {
       rng <- range(intensScores, na.rm=TRUE)
       if (symmScale) rng <- c(-max(abs(rng)),max(abs(rng)))
     }
@@ -105,6 +105,11 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 	}
   } else {
 	dm <- intensScores[i,,]
+        if (!symmScale) {
+          rng <- range(dm, na.rm=TRUE)
+          if (symmScale) rng <- c(-max(abs(rng)),max(abs(rng)))
+        }
+
 	titName <- paste("Signal:", colnames(dataMatrix)[i], label[orderingIndex[i]], names(orderingList)[orderingIndex[i]], sep="")
 	if(plotType=="line")
 	{

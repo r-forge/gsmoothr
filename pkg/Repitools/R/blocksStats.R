@@ -106,10 +106,12 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
 })
 
 setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, total.lib.size=TRUE, ...) {
+	if(!all(c("chr", "name", "start", "end")  %in% colnames(coordinatesTable)))
+		stop("Incorrect column headings for coordinatesTable. Check documentation for details.")
 	if (verbose) cat("Generating table of counts\n")
-	if (useAsRegions) dm <- annotationBlocksCounts(cs, coordinatesTable, seqLen) else {
+	if (useAsRegions) dm <- annotationBlocksCounts(cs, coordinatesTable, seqLen, verbose) else {
 		coordinatesTable$position <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
-		dm <- annotationCounts(cs, coordinatesTable, upStream, downStream, seqLen)
+		dm <- annotationCounts(cs, coordinatesTable, upStream, downStream, seqLen, verbose)
 	}
 
 	if (total.lib.size) {

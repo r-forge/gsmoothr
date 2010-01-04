@@ -8,7 +8,7 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
 }
 \usage{
 \method{binPlots}{GenomeDataList}(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, seqLen=NULL, verbose=FALSE, ...)
-\method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, symmScale = FALSE, verbose = FALSE, ...)
+\method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,8 +21,10 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
   \item{cols}{vector of colours}
   \item{lwd}{line width (either scalar or vector)}
   \item{lty}{line type (either scalar or vector)}
+  \item{sameScale}{should the scale on all plots be the same}
   \item{symmScale}{should the scale on plots be symmetrical ie centred around 0}
   \item{verbose}{Print details of processing.}
+  \item{removeZeros}{Remove zero values.}
   \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{position}, \code{strand}}
   \item{upStream}{number of bases upstream to plot}
   \item{downStream}{number of bases upstream to plot}
