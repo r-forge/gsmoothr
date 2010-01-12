@@ -1,4 +1,4 @@
-confidenceGraphs <- function(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), ...) {
+significanceGraphs <- function(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), ...) {
 	#Test geneList for sanity
 	for (i in 1:length(geneList)) if (class(geneList[[i]])=="logical") {
 		if (length(geneList[[i]])!=nrow(lookupTable)) 

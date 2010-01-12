@@ -115,9 +115,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 	}
 
 	if (total.lib.size) {
-		lib.sizes <- IRanges::as.list(BSgenome::gdapply(cs, function(x) length(unlist(x))))
-		lib.sizes <- lapply(lib.sizes, IRanges::as.list)
-		lib.sizes <- sapply(lib.sizes, function(x) sum(unlist(x)))
+		lib.sizes <- laneCounts(cs)
 	} else	lib.sizes <- colSums(dm)
 	dmRes <- cbind(coordinatesTable, dm)
 	for (i in 1:ncol(design)) {

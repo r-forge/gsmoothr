@@ -1,11 +1,11 @@
-\name{confidenceGraphs}
-\alias{confidenceGraphs}
+\name{significanceGraphs}
+\alias{significanceGraphs}
 \title{Create line plots of averaged signal across a promoter compared to random sampling}
 \description{
 Creates a plot where the average signal across a promoter of supplied gene lists is compared to random samplings of all genes, with a shaded confidence area.
 }
 \usage{
-confidenceGraphs(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), ...)
+significanceGraphs(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), ...)
 }
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
