@@ -55,7 +55,7 @@ makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
 }
 
 
-.scoreIntensity <- function(lookup, intensities, minProbes=1, removeZeros=FALSE, returnMatrix=FALSE) {
+.scoreIntensity <- function(lookup, intensities, minProbes=1, removeZeros=FALSE, returnMatrix=FALSE, useMean=FALSE) {
 	windowMeans <- function(indexes, intensities) {
 	    x <- intensities[indexes]
 		if(removeZeros)
@@ -65,7 +65,8 @@ makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
 	
 	if( class(lookup)=="list") {
 	  useLookup = sapply(lookup, length)>=minProbes
-	  return( median(sapply(lookup[useLookup], windowMeans, intensities), na.rm=TRUE) )
+	  temp <- sapply(lookup[useLookup], windowMeans, intensities)
+	  if (useMean) return(mean(temp, na.rm=TRUE)) else return(median(temp, na.rm=TRUE))
 	} else if (class(lookup)=="matrix") {
 	  d <- lookup
 	  for(i in 1:ncol(lookup)) {
@@ -75,7 +76,7 @@ makeWindowLookupTable <- function(indexes, offsets, starts, ends) {
 	    d[d==0] <- NA
 	  if (returnMatrix)
 	    return(d)
-	  return( apply(d,2,median,na.rm=TRUE) )
+	  if (useMean) return( apply(d,2,mean,na.rm=TRUE) ) else return( apply(d,2,median,na.rm=TRUE) )
 	} else {
 	  stop("lookup is neither a 'list' or a 'matrix'.")
 	}

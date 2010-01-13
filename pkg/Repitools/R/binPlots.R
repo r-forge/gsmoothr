@@ -1,4 +1,4 @@
-setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, seqLen=NULL, verbose=FALSE, ...) {
+setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...) {
 
 	blockPos <- seq.int(-upStream, downStream, by)
 	if (verbose) cat("made blockPos\n")
@@ -12,14 +12,18 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, upStrea
 	annoBlocks$end[annoBlocks$strand=="-"] <- annoBlocks$end[annoBlocks$strand=="-"] - blockPos
 	if (verbose) cat("made annoBlocks\n")
 	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen, verbose)
+	if (total.lib.size) {
+		if (verbose) cat("normalising to total library sizes\n")
+		annoCounts <- t(t(annoCounts)/laneCounts(rs))*1000000
+	}
 	if (verbose) cat("made annoCounts\n")
 	annoTable <- matrix(1:nrow(annoCounts), byrow=TRUE, ncol=length(blockPos), nrow=nrow(coordinatesTable), dimnames=list(NULL, blockPos))
 	if (verbose) cat("made annoTable\n")
-	binPlots(annoCounts, annoTable, removeZeros=FALSE, ...)
+	binPlots(annoCounts, annoTable, removeZeros=FALSE, useMean=TRUE, ...)
 })
 
 
-setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, ...) {
+setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, useMean=FALSE, ...) {
 
   plotType <- match.arg(plotType)
   
@@ -77,9 +81,9 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 		level <- cutLevels[j]
 	    lookupTableSubset <- lookupTable[breaks[[orderingIndex[i]]][["intervals"]]==level, ]
 	  if( plotType %in% c("line","heatmap","terrain")) {
-	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=removeZeros)	
+	    intensScores[i,,j] <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, removeZeros=removeZeros, useMean=useMean)	
       } else {
-		d <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, returnMatrix=TRUE,removeZeros=removeZeros)
+		d <- .scoreIntensity(lookupTableSubset, intensities=dataMatrix[,i], minProbes=2, returnMatrix=TRUE, removeZeros=removeZeros, useMean=useMean)
 		intensScores[[i]][[j]] <- boxplot(as.data.frame(d), plot=FALSE)
 	  }
 	}
@@ -105,7 +109,7 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 	}
   } else {
 	dm <- intensScores[i,,]
-        if (!symmScale) {
+        if (!sameScale) {
           rng <- range(dm, na.rm=TRUE)
           if (symmScale) rng <- c(-max(abs(rng)),max(abs(rng)))
         }

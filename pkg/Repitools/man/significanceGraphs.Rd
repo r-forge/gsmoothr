@@ -1,14 +1,18 @@
 \name{significanceGraphs}
 \alias{significanceGraphs}
+\alias{significanceGraphs.GenomeDataList}
+\alias{significanceGraphs.matrix}
 \title{Create line plots of averaged signal across a promoter compared to random sampling}
 \description{
 Creates a plot where the average signal across a promoter of supplied gene lists is compared to random samplings of all genes, with a shaded confidence area.
 }
 \usage{
-significanceGraphs(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), ...)
+\method{significanceGraphs}{matrix}(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), removeZeros=TRUE, useMean=FALSE, ...)
+\method{significanceGraphs}{GenomeDataList}(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
 }
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
+  \item{rs}{\code{GenomeDataList} of sequencing data to use}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
   \item{geneList}{Names \code{list} of \code{logical} or \code{integer} vectors, specifying the genes to be averaged and plotted}
   \item{titles}{\code{character} vector of titles for the plots}
@@ -16,7 +20,17 @@ significanceGraphs(dataMatrix, lookupTable, geneList, titles, nSamples=100, conf
   \item{confidence}{percentage confidence interval to be plotted (must be > 0.5 and < 1.0}
   \item{legend.plot}{Where to plot the legend - directly passed to \code{legend}. NA suppresses the legend}
   \item{cols}{the colour for each of the genelists supplied}
-  \item{...}{further arguments sent to \code{matplot}}
+  \item{removeZeros}{Remove zero values.}
+  \item{useMean}{Whether to use mean instead of median within gene lists (useful for seq data).}  
+  \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{position}, \code{strand}}
+  \item{upStream}{number of bases upstream to plot}
+  \item{downStream}{number of bases upstream to plot}
+  \item{by}{how many bases between data points}
+  \item{bw}{how many bases up and downstream to be counted}
+  \item{total.lib.size}{whether to use the total number of sequencing reads per lane to normalise.}
+  \item{seqLen}{If sequencing reads need to be extended, the fragment size to be used}
+  \item{verbose}{Print details of processing.}
+  \item{...}{arguments passed from the \code{GenomeDataList} method into the \code{matrix} method.}
 }
 \details{
 For each column of data in \code{dataMatrix} a plot is created showing the average signal of the genes specified in each list element of \code{geneList} compared to \code{nSamples} random samplings of all genes, with \code{confidence} % intervals shaded. If an element of \code{geneList} is a \code{logical} vector, its length must be the same as the number of rows in \code{lookupTable}.
