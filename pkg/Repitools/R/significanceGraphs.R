@@ -10,10 +10,15 @@ setMethodS3("significanceGraphs", "GenomeDataList", function(rs, coordinatesTabl
 	annoBlocks$start[annoBlocks$strand=="-"] <- annoBlocks$start[annoBlocks$strand=="-"] - blockPos
 	annoBlocks$end[annoBlocks$strand=="-"] <- annoBlocks$end[annoBlocks$strand=="-"] - blockPos
 	if (verbose) cat("made annoBlocks\n")
-	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen, verbose)
+	if (!is.null(design)) {
+		stopifnot(all(design %in% c(-1,0,1)), nrow(design)==length(rs))
+		inUse <- !apply(design==0,1,all)
+		design <- design[inUse,]
+	} else inUse <- rep(TRUE, length(rs))
+	annoCounts <- annotationBlocksCounts(rs[inUse], annoBlocks, seqLen, verbose)
 	if (total.lib.size) {
 		if (verbose) cat("normalising to total library sizes\n")
-		annoCounts <- t(t(annoCounts)/laneCounts(rs))*1000000
+		annoCounts <- t(t(annoCounts)/laneCounts(rs[inUse]))*1000000
 	}
 	if (verbose) cat("made annoCounts\n")
 	if (!is.null(design)) {

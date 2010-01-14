@@ -11,14 +11,18 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=
 	annoBlocks$start[annoBlocks$strand=="-"] <- annoBlocks$start[annoBlocks$strand=="-"] - blockPos
 	annoBlocks$end[annoBlocks$strand=="-"] <- annoBlocks$end[annoBlocks$strand=="-"] - blockPos
 	if (verbose) cat("made annoBlocks\n")
-	annoCounts <- annotationBlocksCounts(rs, annoBlocks, seqLen, verbose)
+	if (!is.null(design)) {
+		stopifnot(all(design %in% c(-1,0,1)), nrow(design)==length(rs))
+		inUse <- !apply(design==0,1,all)
+		design <- design[inUse,]
+	} else inUse <- rep(TRUE, length(rs))
+	annoCounts <- annotationBlocksCounts(rs[inUse], annoBlocks, seqLen, verbose)
 	if (total.lib.size) {
 		if (verbose) cat("normalising to total library sizes\n")
-		annoCounts <- t(t(annoCounts)/laneCounts(rs))*1000000
+		annoCounts <- t(t(annoCounts)/laneCounts(rs[inUse]))*1000000
 	}
 	if (verbose) cat("made annoCounts\n")
 	if (!is.null(design)) {
-		stopifnot(all(design %in% c(-1,0,1)), nrow(design)==ncol(annoCounts))
 		if (verbose) cat("applying design matrix\n")
 		design <- apply(design, 2, function(x) {
 					x[x==1] <- 1/sum(x==1)
@@ -34,7 +38,7 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=
 
 
 setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, useMean=FALSE, ...) {
-
+  def.par <- par(no.readonly = TRUE) # save default, for resetting...
   plotType <- match.arg(plotType)
   
   if(!length(orderingList) == ncol(dataMatrix)) {
@@ -163,6 +167,7 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 		}
 
 	  }
+	  par(def.par)#- reset to default
 	  invisible(intensScores)
     }
 })
