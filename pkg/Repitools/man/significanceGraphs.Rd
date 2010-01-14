@@ -8,12 +8,13 @@ Creates a plot where the average signal across a promoter of supplied gene lists
 }
 \usage{
 \method{significanceGraphs}{matrix}(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), removeZeros=TRUE, useMean=FALSE, ...)
-\method{significanceGraphs}{GenomeDataList}(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
+\method{significanceGraphs}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
 }
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
   \item{rs}{\code{GenomeDataList} of sequencing data to use}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
+  \item{design}{Optional for GDL data - design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
   \item{geneList}{Names \code{list} of \code{logical} or \code{integer} vectors, specifying the genes to be averaged and plotted}
   \item{titles}{\code{character} vector of titles for the plots}
   \item{nSamples}{number of times to randomly sample from all genes}

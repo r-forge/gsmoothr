@@ -7,7 +7,7 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-\method{binPlots}{GenomeDataList}(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
+\method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
 \method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -15,6 +15,7 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
   \item{dataMatrix}{\code{matrix} of data to use}
   \item{rs}{\code{GenomeDataList} of sequencing data to use}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
+  \item{design}{Optional for GDL data - design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
   \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{lookupTable}}
   \item{plotType}{type of plot}
   \item{nbins}{number of bins}

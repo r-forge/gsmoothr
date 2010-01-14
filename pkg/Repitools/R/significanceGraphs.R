@@ -1,4 +1,4 @@
-setMethodS3("significanceGraphs", "GenomeDataList", function(rs, coordinatesTable, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...) {
+setMethodS3("significanceGraphs", "GenomeDataList", function(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...) {
 	blockPos <- seq.int(-upStream, downStream, by)
 	if (verbose) cat("made blockPos\n")
 	annoBlocks <- data.frame(chr=rep(coordinatesTable$chr, each=length(blockPos)),
@@ -16,13 +16,23 @@ setMethodS3("significanceGraphs", "GenomeDataList", function(rs, coordinatesTabl
 		annoCounts <- t(t(annoCounts)/laneCounts(rs))*1000000
 	}
 	if (verbose) cat("made annoCounts\n")
+	if (!is.null(design)) {
+		stopifnot(all(design %in% c(-1,0,1)), nrow(design)==ncol(annoCounts))
+		if (verbose) cat("applying design matrix\n")
+		design <- apply(design, 2, function(x) {
+					x[x==1] <- 1/sum(x==1)
+					x[x==-1] <- -1/sum(x==-1)
+					return(x)
+				})
+		annoCounts <- annoCounts %*% design 
+	}
 	annoTable <- matrix(1:nrow(annoCounts), byrow=TRUE, ncol=length(blockPos), nrow=nrow(coordinatesTable), dimnames=list(NULL, blockPos))
 	if (verbose) cat("made annoTable\n")
 	significanceGraphs(annoCounts, annoTable, removeZeros=FALSE, useMean=TRUE, ...)
 })
 
 
-setMethodS3("significanceGraphs", "matrix", function(dataMatrix, lookupTable, geneList, titles, nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), removeZeros=TRUE, useMean=FALSE, ...) {
+setMethodS3("significanceGraphs", "matrix", function(dataMatrix, lookupTable, geneList, titles=colnames(dataMatrix), nSamples=100, confidence=0.975, legend.plot="topleft", cols=rainbow(length(geneList)), removeZeros=TRUE, useMean=FALSE, ...) {
 	#Test geneList for sanity
 	for (i in 1:length(geneList)) if (class(geneList[[i]])=="logical") {
 		if (length(geneList[[i]])!=nrow(lookupTable)) 
