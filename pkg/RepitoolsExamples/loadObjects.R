@@ -1,0 +1,22 @@
+require(aroma.affymetrix)
+
+whereToReturn <- getwd()
+loadDirectory <- system.file("data", package="Repitools")
+setwd(loadDirectory)
+
+cdfTiling <- AffymetrixCdfFile$byChipType("Hs_PromPR_v02", verbose = verbose)
+cdfExpression <- AffymetrixCdfFile$byChipType("HuGene-1_0-st-v1", verbose = verbose)
+celsetExpression <- AffymetrixCelSet$byName("geneExpression", cdf = cdfExpression, verbose = verbose)
+celsetK2me3Tiling <- AffymetrixCelSet$byName("K27me3Tiling", cdf = cdfTiling, verbose = verbose)
+celsetK9AcTiling <- AffymetrixCelSet$byName("K9AcTiling", cdf = cdfTiling, verbose = verbose)
+cat("\nReading human genome annotation.")
+genePositions <- read.csv("annotationData/humanGenomeAnnotation.csv")
+cat("\nAnnotation reading done.")
+cat("\nReading sequencing data.")
+load("rawData/sequencing/Condition1Sample1.Rdata")
+load("rawData/sequencing/Condition1Sample2.Rdata")
+load("rawData/sequencing/Condition2Sample1.Rdata")
+load("rawData/sequencing/Condition2Sample2.Rdata")
+cat("\nLoading raw data complete.\n")
+
+setwd(whereToReturn)

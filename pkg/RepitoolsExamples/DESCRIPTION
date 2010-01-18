@@ -1,0 +1,8 @@
+Package: RepitoolsExamples
+Version: 1.0
+Date: 2009/03/23
+Title: Examples For Repitools User Guide
+Author: Mark Robinson <mrobinson@wehi.edu.au>
+Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+Description: All the datasets that were used for the user manual examples.
+License: LGPL version 2 or newer
