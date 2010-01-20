@@ -1,9 +1,4 @@
 require(aroma.affymetrix)
-
-whereToReturn <- getwd()
-loadDirectory <- system.file("data", package="Repitools")
-setwd(loadDirectory)
-
 cdfTiling <- AffymetrixCdfFile$byChipType("Hs_PromPR_v02", verbose = verbose)
 cdfExpression <- AffymetrixCdfFile$byChipType("HuGene-1_0-st-v1", verbose = verbose)
 celsetExpression <- AffymetrixCelSet$byName("geneExpression", cdf = cdfExpression, verbose = verbose)
@@ -19,4 +14,3 @@ load("rawData/sequencing/Condition2Sample1.Rdata")
 load("rawData/sequencing/Condition2Sample2.Rdata")
 cat("\nLoading raw data complete.\n")
 
-setwd(whereToReturn)
