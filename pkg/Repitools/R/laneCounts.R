@@ -5,6 +5,7 @@
 
 
 laneCounts <- function(cs) {
+	if ("GenomeData" %in% class(cs)) cs <- GenomeDataList(list(cs))
 	stopifnot("GenomeDataList" %in% class(cs))
 	#require(IRanges)
 	#require(BSgenome)
