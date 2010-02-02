@@ -86,18 +86,19 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
 		}
 		else
 		{
-			pos <- rep(NA,nrow(coordinatesTable))
-			pos[coordinatesTable$strand=="+"] <- coordinatesTable$start[coordinatesTable$strand=="+"]
-			pos[coordinatesTable$strand=="-"] <- coordinatesTable$end[coordinatesTable$strand=="-"]
-
-			genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, strand=coordinatesTable$strand, 
-									row.names=coordinatesTable$name, stringsAsFactors=FALSE)
+			pos <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
+			
+			genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, 
+			strand=coordinatesTable$strand, row.names=coordinatesTable$name,
+			stringsAsFactors=FALSE)
 																											
 			# run lookup twice.  first to get a list of smaller list of probes to use
-			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+			annot <- annotationLookup(probePositions, genePositions, upStream,
+			downStream, verbose=verbose)
 			pb <- unique(unlist(annot$indexes, use.names=FALSE))
 			probePositions <- probePositions[pb,]
-			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
+			annot <- annotationLookup(probePositions, genePositions, upStream,
+			downStream, probeIndex=pb, verbose=verbose)
 		}
 	}
 
