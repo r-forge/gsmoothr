@@ -54,7 +54,6 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
 
   # cs - AffymetrixCelSet to read probe-level data from
   # coordinatesTable - data frame giving genome coordinates or regions of interest coordinates
-  # lookupT - (optional) Used when useAsRegions = NULL. Table matching coordinatesTable giving indices of probe-level data across promoter
   # ind - (optional) 
   # dmP - data matrix of probes
   
@@ -68,16 +67,6 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
 	cs <- extract(cs, w, verbose=verbose)
 	probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
 	
-	dmP <- extractMatrix(cs, verbose=verbose)
-	if(log2adjust == TRUE)
-	{
-		diffs <- log2(dmP) %*% design[w,]
-	}
-	else
-	{
-		diffs <- dmP %*% design[w,]
-	}
-
 	if(is.null(annot))
 	{
 		if(useAsRegions == TRUE)
@@ -93,15 +82,23 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
 			stringsAsFactors=FALSE)
 																											
 			# run lookup twice.  first to get a list of smaller list of probes to use
-			annot <- annotationLookup(probePositions, genePositions, upStream,
-			downStream, verbose=verbose)
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
 			pb <- unique(unlist(annot$indexes, use.names=FALSE))
 			probePositions <- probePositions[pb,]
-			annot <- annotationLookup(probePositions, genePositions, upStream,
-			downStream, probeIndex=pb, verbose=verbose)
+			annot <- annotationLookup(probePositions, genePositions, upStream, downStream, verbose=verbose)
 		}
 	}
 
+	dmP <- extractMatrix(cs, cells=probePositions$index, verbose=verbose)
+	if(log2adjust == TRUE)
+	{
+		diffs <- log2(dmP) %*% design[w,]
+	}
+	else
+	{
+		diffs <- dmP %*% design[w,]
+	}
+	
 	return(.blocksStats(diffs, coordinatesTable, design, upStream, downStream, verbose, robust, minNRobust, adjustMethod, useAsRegions, annot))
   
 })

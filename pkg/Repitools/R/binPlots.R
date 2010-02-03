@@ -36,6 +36,35 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=
 	binPlots(annoCounts, annoTable, removeZeros=FALSE, useMean=TRUE, ...)
 })
 
+setMethodS3("binPlots", "AffymetrixCelSet", function(cs, probeMap=NULL, coordinatesTable=NULL, upStream=7500, downStream=2500, by=100, bw=300, log2adjust=TRUE, verbose=FALSE, ...) {			
+	if (is.null(probeMap)) {
+		if (is.null(coordinatesTable)) stop("Either probeMap or coordinatesTable must be supplied!")
+		probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
+		pos <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
+		genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, 
+				strand=coordinatesTable$strand, row.names=coordinatesTable$name,
+				stringsAsFactors=FALSE)
+			
+		# run lookup twice.  first to get a list of smaller list of probes to use
+		annot <- annotationLookup(probePositions, genePositions, upStream+bw, downStream+bw, verbose=verbose)
+		pb <- unique(unlist(annot$indexes, use.names=FALSE))
+		probePositions <- probePositions[pb,]
+		annot <- annotationLookup(probePositions, genePositions, upStream+bw, downStream+bw, verbose=verbose)
+		lookupT <- makeWindowLookupTable(annot$indexes, annot$offsets,
+				starts = seq(-upStream-bw, downStream-bw, by), ends = seq(-upStream+bw, downStream+bw, by))
+	} else {
+		if (verbose) cat("Using supplied probeMap\n")
+		probePositions <- probeMap$probePositions
+		lookupT <- probeMap$lookupT
+	}
+	
+	dmM <- extractMatrix(cs, cells = probePositions$index, verbose = verbose)
+	if (log2adjust) dmM <- log2(dmM)
+
+	binPlots(dmM, lookupT, ...)
+	invisible(list(lookupT=lookupT, probePositions=probePositions))
+})
+
 
 setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, useMean=FALSE, ...) {
   def.par <- par(no.readonly = TRUE) # save default, for resetting...
@@ -168,7 +197,6 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 
 	  }
 	  par(def.par)#- reset to default
-	  invisible(intensScores)
     }
 })
 

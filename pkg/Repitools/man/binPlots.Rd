@@ -1,6 +1,7 @@
 \name{binPlots}
 \alias{binPlots}
 \alias{binPlots.GenomeDataList}
+\alias{binPlots.AffymetrixCelSet}
 \alias{binPlots.matrix}
 \title{Create line plots of averaged signal across a promoter}
 \description{
@@ -8,12 +9,16 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
 }
 \usage{
 \method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
+\method{binPlots}{AffymetrixCelSet}(cs, probeMap=NULL, coordinatesTable=NULL, upStream=7500, downStream=2500, by=100, bw=300, log2adjust=TRUE, verbose=FALSE, ...)
 \method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dataMatrix}{\code{matrix} of data to use}
   \item{rs}{\code{GenomeDataList} of sequencing data to use}
+  \item{cs}{\code{AffymetrixCelSet} of array data to use}
+  \item{probeMap}{A pre-made mapping of probes to a coordinatesTable}
+  \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{name}, \code{start}, \code{end}, \code{strand}.}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
   \item{design}{Optional for GDL data - design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
   \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{lookupTable}}
@@ -27,11 +32,11 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
   \item{verbose}{Print details of processing.}
   \item{removeZeros}{Remove zero values.}
   \item{useMean}{Whether to use mean instead of median within bins (useful for seq data).}
-  \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{position}, \code{strand}}
   \item{upStream}{number of bases upstream to plot}
   \item{downStream}{number of bases upstream to plot}
   \item{by}{how many bases between data points}
   \item{bw}{how many bases up and downstream to be counted}
+  \item{log2adjust}{whether to take log2 of array intensities.}
   \item{total.lib.size}{whether to use the total number of sequencing reads per lane to normalise.}
   \item{seqLen}{If sequencing reads need to be extended, the fragment size to be used}
   \item{...}{further arguments to send to \code{bxp}}
