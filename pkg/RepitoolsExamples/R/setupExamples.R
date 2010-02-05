@@ -1,7 +1,6 @@
 setupExamples <- function(doCopy=FALSE) {
 	dataDirectory <- system.file("exampleData", package="RepitoolsExamples")
-	if  (dir.create(paste(dataDirectory,"test", sep="/"), showWarnings=FALSE)) {
-		x = file.remove(paste(dataDirectory,"test", sep="/"))
+	if  (file.access(dataDirectory, 2)) {
 		setwd(dataDirectory)
 		cat("Successfully setwd to example data directory\n")
 		invisible(NULL)

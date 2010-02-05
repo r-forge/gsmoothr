@@ -132,7 +132,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 		colnames(de) <- paste(colnames(de), colnames(design)[i], sep="_")
 		dmRes <- merge(dmRes, de, all.x = TRUE, by.x = "row.names", by.y = "row.names", sort = FALSE)
 	}
-	cbind(coordinatesTable, modCounts, dmRes)
+	cbind(coordinatesTable, modCounts[, -1], dmRes[, -1])
 })
 
 
