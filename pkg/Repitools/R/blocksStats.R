@@ -127,12 +127,16 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 		d <- DGEList(counts=dm[,design[,i]!=0], group=as.character(design[design[,i]!=0,i]), lib.size=lib.sizes[design[,i]!=0])
 		d.disp <- estimateCommonDisp(d)
 		modCounts <- merge(modCounts, d.disp$pseudo.alt, all.x = TRUE, by.x = "row.names", by.y = "row.names", sort = FALSE)
+		m <- match(modCounts[,"Row.names"], coordinatesTable$name)
+		modCounts <- modCounts[m, -1]
 		deD <- exactTest(d.disp, pair = c("-1","1"))
 		de <- topTags(deD, n=nrow(deD$table))@.Data[[1]]
 		colnames(de) <- paste(colnames(de), colnames(design)[i], sep="_")
 		dmRes <- merge(dmRes, de, all.x = TRUE, by.x = "row.names", by.y = "row.names", sort = FALSE)
+		m <- match(dmRes[,"Row.names"], coordinatesTable$name)
+		dmRes <- dmRes[m, -1]
 	}
-	cbind(coordinatesTable, modCounts[, -1], dmRes[, -1])
+	cbind(coordinatesTable, modCounts, dmRes)
 })
 
 
