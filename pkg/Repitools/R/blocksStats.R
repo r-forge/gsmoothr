@@ -103,7 +103,7 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
   
 })
 
-setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, libSize=c("lane", "inRegions", "ref"), ...) {
+setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, libSize="ref", ...) {
 	require(edgeR)
 	if(!all(c("chr", "name", "start", "end")  %in% colnames(coordinatesTable)))
 		stop("Incorrect column headings for coordinatesTable. Check documentation for details.")
