@@ -103,7 +103,8 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
   
 })
 
-setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, total.lib.size=TRUE, ...) {
+setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, libSize=c("lane", "inRegions", "ref"), ...) {
+	require(edgeR)
 	if(!all(c("chr", "name", "start", "end")  %in% colnames(coordinatesTable)))
 		stop("Incorrect column headings for coordinatesTable. Check documentation for details.")
 	if (verbose) cat("Generating table of counts\n")
@@ -112,22 +113,26 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 		dm <- annotationCounts(cs, coordinatesTable, upStream, downStream, seqLen, verbose)
 	}
 
-	if (total.lib.size) {
+	if (libSize == "lane")
 		lib.sizes <- laneCounts(cs)
-	} else	lib.sizes <- colSums(dm)
-	dmRes <- cbind(coordinatesTable, dm)
+	if(libSize == "inRegions")
+		lib.sizes <- colSums(dm)
+	if(libSize == "ref")
+		lib.sizes <- colSums(dm) * calcNormFactors(dm, Acutoff=-13)
+	
+	modCounts <- dmRes <- matrix(nrow = nrow(coordinatesTable), ncol = 0, dimnames = list(coordinatesTable$name, NULL))
 	for (i in 1:ncol(design)) {
 		if (verbose) cat("Processing column",i,"of design matrix\n")
 		stopifnot(sum(design[,i]==1)>0, sum(design[,i]==-1)>0, all(design[,i] %in% c(-1,0,1)))
-		require(edgeR)
 		d <- DGEList(counts=dm[,design[,i]!=0], group=as.character(design[design[,i]!=0,i]), lib.size=lib.sizes[design[,i]!=0])
 		d.disp <- estimateCommonDisp(d)
-		deD <- exactTest(d.disp, pair=c("-1","1"))
+		modCounts <- merge(modCounts, d.disp$pseudo.alt, all.x = TRUE, by.x = "row.names", by.y = "row.names", sort = FALSE)
+		deD <- exactTest(d.disp, pair = c("-1","1"))
 		de <- topTags(deD, n=nrow(deD$table))@.Data[[1]]
 		colnames(de) <- paste(colnames(de), colnames(design)[i], sep="_")
-		dmRes <- merge(dmRes, de, all.x=TRUE, by.x="name", by.y="row.names")
+		dmRes <- merge(dmRes, de, all.x = TRUE, by.x = "row.names", by.y = "row.names", sort = FALSE)
 	}
-	dmRes
+	cbind(coordinatesTable, modCounts, dmRes)
 })
 
 
