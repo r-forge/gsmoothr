@@ -1,5 +1,6 @@
-setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...) {
-
+setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="ref", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...) {
+	if(libSize == "ref" && is.null(Acutoff))
+		stop("Must give value of Acutoff if using \"ref\" normalisation.\n")
 	blockPos <- seq.int(-upStream, downStream, by)
 	if (verbose) cat("made blockPos\n")
 	annoBlocks <- data.frame(chr=rep(coordinatesTable$chr, each=length(blockPos)),
@@ -14,12 +15,16 @@ setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=
 	if (!is.null(design)) {
 		stopifnot(all(design %in% c(-1,0,1)), nrow(design)==length(rs))
 		inUse <- !apply(design==0,1,all)
-		design <- design[inUse,]
+		design <- design[inUse, , drop = FALSE]
 	} else inUse <- rep(TRUE, length(rs))
 	annoCounts <- annotationBlocksCounts(rs[inUse], annoBlocks, seqLen, verbose)
-	if (total.lib.size) {
+	if (libSize == "ref") {
+		if (verbose) cat("normalising to reference sample\n")
+		annoCounts <- t(t(annoCounts) * calcNormFactors(annoCounts, Acutoff = Acutoff))
+		
+	} else { # libSize = "lane"
 		if (verbose) cat("normalising to total library sizes\n")
-		annoCounts <- t(t(annoCounts)/laneCounts(rs[inUse]))*1000000
+		annoCounts <- t(t(annoCounts)/laneCounts(rs[inUse]))*1000000	
 	}
 	if (verbose) cat("made annoCounts\n")
 	if (!is.null(design)) {

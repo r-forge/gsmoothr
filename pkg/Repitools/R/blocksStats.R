@@ -103,7 +103,9 @@ setMethodS3("blocksStats", "AffymetrixCelSet", function(cs, coordinatesTable, an
   
 })
 
-setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, libSize="ref", ...) {
+setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, design, upStream=0, downStream=2000, verbose=TRUE, useAsRegions=FALSE, seqLen=NULL, libSize="ref", Acutoff=NULL, ...) {
+	if(libSize == "ref" && is.null(Acutoff))
+		stop("Must give value of Acutoff if using \"ref\" normalisation.\n")
 	require(edgeR)
 	if(!all(c("chr", "name", "start", "end")  %in% colnames(coordinatesTable)))
 		stop("Incorrect column headings for coordinatesTable. Check documentation for details.")
@@ -118,7 +120,7 @@ setMethodS3("blocksStats", "GenomeDataList", function(cs, coordinatesTable, desi
 	if(libSize == "inRegions")
 		lib.sizes <- colSums(dm)
 	if(libSize == "ref")
-		lib.sizes <- colSums(dm) * calcNormFactors(dm, Acutoff=-13)
+		lib.sizes <- colSums(dm) * calcNormFactors(dm, Acutoff=Acutoff)
 	
 	modCounts <- dmRes <- matrix(nrow = nrow(coordinatesTable), ncol = 0, dimnames = list(coordinatesTable$name, NULL))
 	for (i in 1:ncol(design)) {

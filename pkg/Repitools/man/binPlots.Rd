@@ -8,7 +8,7 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-\method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, total.lib.size=TRUE, seqLen=NULL, verbose=FALSE, ...)
+\method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="ref", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...)
 \method{binPlots}{AffymetrixCelSet}(cs, probeMap=NULL, coordinatesTable=NULL, upStream=7500, downStream=2500, by=100, bw=300, log2adjust=TRUE, verbose=FALSE, ...)
 \method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
 }
@@ -37,8 +37,9 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
   \item{by}{how many bases between data points}
   \item{bw}{how many bases up and downstream to be counted}
   \item{log2adjust}{whether to take log2 of array intensities.}
-  \item{total.lib.size}{whether to use the total number of sequencing reads per lane to normalise.}
+  \item{libSize}{Either the string \code{"ref"} to normalise to a reference or \code{"lane"} to multiply each library to be the same size.}
   \item{seqLen}{If sequencing reads need to be extended, the fragment size to be used}
+  \item{Acutoff}{If \code{libSize} is \code{"ref"}, this argument must be provided. Otherwise, it must not. Cutoff on the "A" values to take, before calculating trimmed mean.}
   \item{...}{further arguments to send to \code{bxp}}
 }
 \details{
