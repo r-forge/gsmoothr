@@ -12,7 +12,7 @@ mappabilityCalc(locationsTable, windowSize = 500, organism)
   \item{organism}{The \code{BSgenome} object to calculate mappability upon.}
 }
 \details{
-The windows considered will be \code{windowSize} bases upstream and downstream of the given position. The value returned for each region is a percentage of bases in that region that are not N (any base in IUPAC nomenclature).
+The windows considered will be \code{windowSize / 2} bases upstream and downstream of the given position, for each position. The value returned for each region is a percentage of bases in that region that are not N (any base in IUPAC nomenclature).
 }
 \value{
   A vector of mappability percentages, one for each region.
