@@ -1,0 +1,399 @@
+\documentclass[a4paper, 12pt]{article}
+\author{\href{mailto:m.robinson@garvan.org.au}{Mark Robinson}  \href{mailto:a.statham@garvan.org.au}{Aaron Statham}  \href{mailto:d.strbenac@garvan.org.au}{Dario Strbenac}}
+\date{}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amscd}
+\usepackage{graphicx}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\topmargin 0in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+\evensidemargin 0in
+\textwidth 176mm
+\textheight 215mm
+
+\usepackage{color}
+\usepackage{Sweave}
+\usepackage[pdftex]{hyperref}
+
+\begin{document}
+\title{\texttt{Repitools}: A collection of utilities for understanding epigenetic data.}
+\maketitle
+
+\section{Introduction}
+\texttt{Repitools} is an R package to assist with the analysis of datasets typically found in epigenetics research; that is, those of a high dimensionality. The main focus of the package is the analysis of tiling and expression arrays. Functionality for Affymetrix and Nimblegen platforms is present. To keep this manual concise, the example used will be on some Affymetrix data. However, the functions are simple to use on Nimblegen data too, usually with the only difference being an extra parameter being given. Consult the help page of each function for how to use it on Nimblegen data. Additionally, simple analysis of next - generation sequencing data is also possible. Also, there are many options for each function, and just the main options are covered in this user manual.
+\\ \\
+The abilities of the package will be illustrated through a series of examples.
+
+\section{Getting the \texttt{Repitools} Package} 
+The package can be acquired by running the command
+
+<<eval=FALSE>>=
+install.packages("Repitools", repos = "http://r-forge.r-project.org")
+@
+
+To get the data to use with these examples, type
+
+<<eval=FALSE>>=
+install.packages("RepitoolsExamples", repos = "http://r-forge.r-project.org")
+@
+
+It can then be loaded by calling the function \texttt{setupExamples()}, after the package has been loaded into R.
+
+\texttt{Repitools} also depends on a number of packages. These are:
+
+\begin{itemize}
+	\item aroma.affymetrix
+	\item edgeR
+	\item limma
+	\item BSgenome
+	\item IRanges
+	\item ShortRead
+	\item chipseq
+\end{itemize}
+
+Download and install these from their respective websites before using \texttt{Repitools}.
+
+<<loadLibs, echo = FALSE>>=
+library(Repitools)
+library(RepitoolsExamples)
+library(limma)
+library(aroma.affymetrix)
+library(BSgenome)
+@
+
+\section{Setting up the aroma.affymetrix environment}
+Repitools uses the \texttt{aroma.affymetrix} package, which requires data and their annotations to be in a specific directory structure, which must be writable by the end-user. The \texttt{RepitoolsExamples} package has the included example data files laid out correctly, and can be setup by executing
+<<aromaSetup1>>=
+setupExamples()
+@
+Or, if you wish to copy the example data into the current working directory (for instance if the package has been installed system-wide into a non-writable location), execute instead
+<<aromaSetup2, eval=FALSE>>=
+setupExamples(doCopy=TRUE)
+@
+
+\section{Reading the example data}
+The data used in these examples are largely from our recent paper\footnote{Marcel W. Coolen, Clare Stirzaker, Jenny Z. Song, Aaron L. Statham, Zena Kassir, Carlos S. Moreno, Andrew N. Young, Vijay Varma, Terence P. Speed, Mark Cowley, Paul Lacaze, Warren Kaplan, Mark D. Robinson and Susan J. Clark (2010) Consolidation of the cancer genome into domains of repressive chromatin by long-range epigenetic silencing (LRES) reduces transcriptional plasticity. \textit{Nature Cell Biology}} where we integrated expression and epigenetic data of normal prostate epithelial cells (PrEC) and the LNCaP prostate cancer cell line. The example data includes Affymetrix Human Promoter 1.0R tiling arrays from a histone H3K9 acetylation chromatin immunoprecipitation experiment, matching Affymetrix Human Gene 1.0ST expression arrays, and Illumina sequencing libraries. 
+
+Now, a design matrix, and references to the CDF file and CEL set are created. The CEL set is MAT normalised and MAT smoothed \footnote{Johnson W.E., Li W., Meyer CA., Gottardo R., Carroll J.S., Brown M., and Liu X.S. (2006) Model-based analysis of tiling-arrays for ChIP-chip. \textit{Proc. Natl. Acad. Sci. USA} 103: 12457-12462}.
+ 
+<<readCelCdf>>=
+#aroma.affymetrix housekeeping
+capture <- function(...) UseMethod("capture")
+
+cdfT <- AffymetrixCdfFile$byChipType("Hs_PromPR_v02")
+csT <- AffymetrixCelSet$byName("Tiling", cdf = cdfT)
+#Handles probes which map to genome more than once
+csTU <- convertToUnique(csT)
+
+MN <- MatNormalization(csT, numChunks = 15)
+csTMN <- process(MN)	
+#Handles probes which map to genome more than once
+csTMNU <- convertToUnique(csTMN)
+
+#Describe 3 comparisons we are interested in
+design <- cbind("PrEC K9Ac"=c( 0, 0,-1, 1),
+               "LNCAP K9Ac"=c(-1, 1, 0, 0),
+          "LNCaP-PrEC K9Ac"=c(-1, 1, 1,-1))
+rownames(design) <- getNames(csT)
+print(design)
+MS <- MatSmoothing(csTMNU, design = design, probeWindow = 300, tag = "300bp_smoothing", nProbes = 10)
+csTS <- process(MS, units = NULL)
+@
+
+Next, perform a standard Robust Multixchip Analyis (RMA) \footnote{Irizarry R. A., Bolstad B. M., Collin F., Cope L. M., Hobbs, B., Speed, T.P. (2003) Summaries of Affymetrix GeneChip probe level data \textit{Nucleic Acids Research} 31(4):e15} on the example expression data.
+
+<<RmaExpressionSteps>>=
+cdfE <- AffymetrixCdfFile$byChipType("HuGene-1_0-st-v1")
+csE <- AffymetrixCelSet$byName("geneExpression", cdf = cdfE)
+bc <- RmaBackgroundCorrection(csE)
+csEBC <- process(bc)
+qn <- QuantileNormalization(csEBC, typesToUpdate = "pm")
+csEN <- process(qn)
+plm <- RmaPlm(csEN)
+fit(plm)
+ces <- getChipEffectSet(plm)
+em <- log2(extractMatrix(ces))
+rownames(em) <- getUnitNames(cdfE)
+@
+
+Next, read in the the positions of human genes (this was adapted from the annotation provided by Affymetrix for their HuGene 1.0ST array platform).
+<<readCsv>>=
+genes <- read.csv("annotationData/humanGenomeAnnotation.csv")
+em <- em[match(genes$name, rownames(em)),]
+designE <- cbind("PrEC"=c(0, 0, 0.5, 0.5),
+                "LNCaP"=c(0.5, 0.5, 0, 0),
+           "LNCaP-PrEC"=c(0.5, 0.5, -0.5, -0.5))
+rownames(designE) <- getNames(csE)
+print(designE)
+emE <- em %*% designE
+@
+
+Finally, load the sequencing data. It has been stored compactly in a \texttt{BSgenome::GenomeDataList} object only containing the chromosome, strand and start position of each read (details on how to import data into this format are in the appendix). 
+
+<<>>=
+load("rawData/sequencing/seq_data.Rdata")
+print(rs)
+designSeq <- cbind("PrEC IP"=c(1, 1, 0, 0),
+                  "LNCaP IP"=c(0, 0, 1, 1),
+             "LNCaP-PrEC IP"=c(-1,-1, 1,1))
+rownames(designSeq) <- names(rs)
+print(designSeq)
+@
+
+\section{Data Summaries}
+
+\subsection{Plotting Bias Due to CpG Density}
+The function \texttt{cpgBoxplots} is used to create boxplots of intensities, binned by the CpG density surrounding 600 bases of the probe. A range of probe GC content can be given, via the \texttt{gcContent} parameter, to narrow down analysis to probes with GC content in a certain range. Each level of GC content is plotted in a separate graph. The \texttt{samples} parameter must be a vector of length 2, that gives the columns of the intensity matrix to use. The number of bins that the CpG density is binned into is controlled with the \texttt{nBins} parameter. Setting the parameter \texttt{calcDiff} to \textbf{TRUE} will create a single plot of the difference of the first sample in the sample vector to the second sample.
+\\ \\
+\textbf{Examples:}
+<<cpgBP1, fig=TRUE>>=
+cpgBoxplots(csTU, samples = c(1,2), gcContent = 12, nBins = 10)
+@
+
+<<cpgBP2, fig=TRUE>>=
+cpgBoxplots(csTU, samples = c(2,1), gcContent = 12, nBins = 10, calcDiff = TRUE)
+@
+
+\subsection{Binned Plots}
+Binned plots are a way of exploring the relationship between tiling array data
+
+It is possible to bin the tiling array data by the level of expression from another array experiment. The first type of plot to visualise this relationship with is the lineplot. Each line is a different expression bin, and the y-axis is the level of the mark measured by the tiling array. The other type of plot is the heatmap, where the y-axis is the level of expression, and the colour of the square is the level of mark.
+\\ \\
+The expression data is first put through a standard robust multichip analysis. Then, the following steps are needed to match the tiling array probes to relative positions around the TSSs of the expression data.
+\\ \\
+
+\textbf{Example:}
+
+
+<<binPlots1, eval=FALSE>>=
+lookupT <- binPlots(csTS, coordinatesTable=genes, orderingList=list("PrEC Expression"=emE[,"PrEC"], "LNCaP Expression"=emE[,"LNCaP"], "LNCaP-PrEC Expression"=emE[,"LNCaP-PrEC"]), plotType="line", nbins=10)
+#aroma.affymetrix maintenance
+getNames <- function(...) UseMethod("getNames")
+@
+
+<<binPlots1a, fig=TRUE, echo=FALSE>>=
+lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="line", nbins=10)
+#aroma.affymetrix maintenance
+getNames <- function(...) UseMethod("getNames")
+@
+
+<<binPlots1b, fig=TRUE, echo=FALSE>>=
+binPlots(extract(csTS,2), probeMap=lookupT, orderingList=list("LNCaP Expression"=emE[,"LNCaP"]), plotType="line", nbins=10)
+@
+
+<<binPlots1c, fig=TRUE, echo=FALSE>>=
+binPlots(extract(csTS,3), probeMap=lookupT, orderingList=list("LNCaP-PrEC Expression"=emE[,"LNCaP-PrEC"]), plotType="line", nbins=10)
+@
+
+The first time \texttt{binPlots} is called, it will create a mapping between the gene positions supplied and the probes on the tiling array, which is returned. Keeping this mapping and passing it to subsequent \texttt{binPlots} calls as the \texttt{probeMap} parameter will massively speed up plotting.
+
+The \texttt{binPlots} functions also can plot a \texttt{heatmap} or \texttt{terrain} map, both of which benefit from an increase to the \texttt{nBins} argument.
+
+<<binPlots2, fig=TRUE>>=
+binPlots(extract(csTS,1), probeMap=lookupT, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="heatmap", nbins=50)
+@
+
+<<binPlots3, fig=TRUE>>=
+binPlots(extract(csTS,1), probeMap=lookupT, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="terrain", nbins=50)
+@
+
+<<binPlots4, fig=TRUE>>=
+binPlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP IP", drop=FALSE], orderingList=list("LNCaP Expression"=emE[,"LNCaP"]), plotType="heatmap", nbins=50, seqLen=300, libSize="lane")
+@
+
+\subsection{Graphical Comparison of Epigenetic Marks vs. Random Sampling}
+Sometimes, there may be a known set of genes of interest (for example, a set of genes highly expressed under a certain condition). A number of graphs comparing the epigenetic marks of these genes, versus a random sample of genes, can be created in the one command. Each treatent forms a column of the data matrix \texttt{dataMatrix} and the rows correspond to probes. Additionally, a lookup table via the parameter \texttt{lookupTable} must be supplied that maps the probes to genes. The genes of interest are given in the list \texttt{geneList}. Each element of the list can either be a logical vector for each gene, or alternatively, could be an integer vector specifying the rows of the data matrix that are of interest. The confidence interval defaults to 95\%, but can be user - defined through the parameter \texttt{confidence}, which is $ {x : x \in \mathbb{R},  0.5 < x < 1.0}$. The parameter \texttt{nSamples} determines how many probes will be sampled for the null distribution.
+\\ \\
+\textbf{Example:}
+
+<<sigGraphs1, fig=TRUE>>=
+geneList <- list("Upregulated Genes" = which(emE[,"LNCaP-PrEC"] > 1), 
+                 "Downregulated Genes" = which(emE[,"LNCaP-PrEC"] < -1))
+significanceGraphs(extract(csTS, 3), probeMap=lookupT, geneList=geneList, titles="H3K9ac Change Across Promoters")
+@
+
+And again for sequencing data:
+
+<<sigGraphs2, fig=TRUE>>=
+significanceGraphs(rs, coordinatesTable=genes, design=designSeq[,"LNCaP-PrEC IP", drop=FALSE], geneList=geneList, seqLen=300, titles="IP Change Across Promoters")
+@
+
+\subsection{Visualisation of Different Microarray Experiments Side by Side}
+Displaying the heatmaps of arrays under different conditions side by side may help to show key differences in an intuitive way. The multiHeatmap function provides this facility. The data is passed in via the parameter \texttt{dataList}, which is a list of matrices. Each matrix is a different heatmap, and each column in a particular matrix corresponds to a column of a heatmap. A list of colurscales can be given by the parameter \texttt{colourList}. Each heatmap can have its own title, passed in as a list via the parameter \texttt{titles}. The multiheatmap can also have an overall title, which is given by the parameter \texttt{main}.
+\\ \\
+In the following example, the heatmaps of K9Ac mark for five genes within Long Range Epigenetic Activated Regions (LREA) are plotted compared to five random TSS regions. 
+\\ \\
+\textbf{Example:}
+
+<<multiHeatmapsetup>>=
+K9AcStats25001500 <- blocksStats(csTMNU, genes, design = design[,"LNCaP-PrEC K9Ac",drop=FALSE], upStream = 2500, downStream = -1500)
+K9AcStats1500500 <- blocksStats(csTMNU, genes, design = design[,"LNCaP-PrEC K9Ac",drop=FALSE], upStream = 1500, downStream = -500)
+K9AcStats500500 <- blocksStats(csTMNU, genes, design = design[,"LNCaP-PrEC K9Ac",drop=FALSE], upStream = 500, downStream = 500)
+K9AcStats5001500 <- blocksStats(csTMNU, genes, design = design[,"LNCaP-PrEC K9Ac",drop=FALSE], upStream = -500, downStream = 1500)
+
+K9AcSTAT <- cbind(K9AcStats25001500[,16], K9AcStats1500500[,16], K9AcStats500500[,16], K9AcStats5001500[,16])
+colnames(K9AcSTAT) <- paste("t-stat", seq(-2000,1000,by=1000))
+rownames(K9AcSTAT) <- genes$symbol
+K9AcRandomSTAT <- K9AcSTAT[sample(1:24966, 5), ]
+K9AcSTAT <- K9AcSTAT[match(c("FLJ13224", "C12orf72", "SNRPN", "PAR5", "CDK5RAP1"), genes$symbol), ]
+
+cList<-NULL
+br<-seq(-3,3,length=101)
+col <- colorpanel(low="blue",mid="white",high="red",n=100)
+cList[[1]] <- list(breaks=br,colors=col)
+@
+
+<<multiHeatmap, fig = TRUE>>=
+multiHeatmap(list(K9Ac = K9AcSTAT, K9Acrandom = K9AcRandomSTAT), cList, c("K9Ac in LREA genes", "K9Ac in Random"), cwidth = 1, xspace = 5)
+@
+
+
+\section{Global Analysis of Epigenetic Marks}
+To find regions that are statistically significantly different between immunoprecipitates and inputs, the \texttt{regionStats} function is used. Regions are called based on a trimmed mean score, and the score threshold is based on the lowest cutoff that gives an acceptable False Discovery Rate (FDR). The amount of trimming before calculation of the mean is given by \texttt{meanTrim}. The number of probes in the window that have to be above the threshold for the window to be called a significant region is given by \texttt{nProbes}. The FDR is calculated by randomly permuting the probe intensities a number of times, determined by \texttt{nPermutations}, and the minimum ratio of regions in the permuted sample to the actual sample is chosen as the FDR of the threshold. The threshold is progressively lowered until the FDR becomes greater than \texttt{fdrLevel}, and the previous score threshold is chosen to be used in deciding significant regions. Regions that are separated by less than \texttt{maxGap} bases are joined together into one larger region. The regions are returned as a list of data frames, in the list element \texttt{regions}. There is one data frame for each contrast.
+\\ \\
+\textbf{Example:}
+
+<<regionStats>>=
+ind <- getCellIndices(getUniqueCdf(cdfT), unit=indexOf(getUniqueCdf(cdfT),"chr7F"), unlist=TRUE, useNames=FALSE)
+significantRegions <- regionStats(csTMNU, design[,"LNCaP-PrEC K9Ac", drop=FALSE], ind=ind, probeWindow = 300)
+head(significantRegions$regions[[1]][order(significantRegions$regions[[1]]$score, decreasing = TRUE), ])
+@
+
+It may be desired to view these regions in a graphical way. The \texttt{aroma.affymetrix} function \texttt{writeSgr} is a quick method to export the scores into a format readable by the Integrated Genome Browser. The file created is a tab-delimited text file with three columns; chromosome name, probe positon, and probe score. There are no column headings in the file.
+\\ \\
+\textbf{Example:}
+
+<<sgr>>=
+writeSgr(csTS)
+@
+
+This the IGB view of the top differentially K9Ac enriched TSS on the forward strand, as determined by the previous example.
+\begin{figure}[h!]
+\begin{center}
+    \includegraphics[scale = 0.5, bb = 0 0 1901 1139]{igb.png}
+\end{center}
+\caption{IGB view of the most differentially K9Ac enriched region.}
+\end{figure}
+
+\section{Targeted Analysis of Epigenetic Marks}
+Rather than looking across the entire genome, the statistical properties of particular regions can be calculated. The \texttt{blocksStats} function performs this purpose. The function works in one of two modes. If the parameter \texttt{useAsRegions} is set to \textbf{TRUE}, the \texttt{start} and \texttt{end} columns of the \texttt{coordinatesTable} are used as the regions to consider. Otherwise, the TSS is chosen based on the \texttt{strand} column, and the region to use for calculation is defined by the region that starts a number of bases upstream, defined by the parameter \texttt{upStream}, and a number of bases downstream, defined by the parameter  \texttt{downStream}. The minimum number of probes that must be present in a defined region for statistics calculations to be carried out is given by the parameter \texttt{minNRobust}.
+\\ \\
+\textbf{Example:}
+<<blockStats>>=
+statisticsResults <- blocksStats(csTMNU, genes, design=design, upStream=2000, downStream=2000)
+head(statisticsResults)
+@
+
+Quite conveniently, the same function can also be used to perform statistical analysis on sequencing data. The sequencing results are first read into a genomeDataList object. There are two additional options that become available for \texttt{blocksStats} when it is being used to analyse sequencing data. The \texttt{seqLen} parameter can be used to extend the aligned reads to a certain length. Since the fragments of DNA sequenced are usually much longer than the reads given by the experimental procedure, this single number argument will extend all reads based on where in the genome they align to, so that they all are \texttt{seqLen} nt. long.  The other argument specific to sequencing is \texttt{total.lib.size}, which is a boolean value that specifies whether to use the total number of reads genome - wide, or the total number of reads falling within the starts and ends as described by \texttt{coordinatesTable}, as the library size for statistical calculations. If it is \textbf{TRUE}, the library size will the the number of reads in the whole genome. \textbf{FALSE} will mean that the number of reads in the coorinatesTable regions will be taken as the library size. The design matrix needs to be modified, since edgeR can only do pairwise comparisons. Treatments should have 1, controls -1, and others 0.
+\\ \\
+\textbf{Example:}
+
+<<readSeqs>>=
+statistics <- blocksStats(rs, genes, designSeq[,"LNCaP-PrEC IP", drop=FALSE], upStream=2000, downStream=2000, seqLen = 300, libSize="lane")
+head(statistics)
+@
+
+Apart from getting a statistical result, the absolute number of counts within the regions can be determined with the functions \texttt{annotationCounts} and \texttt{annotationBlocksCounts}. The first is used when the same range around all TSSs is to be analysed. The second function is for when the user gives a table of regions to do counts for. The last argument of both functions is \texttt{seqLen}; the number of nt. to extend the reads to.
+
+<<countsSeqs>>=
+genes$position <- ifelse(genes$strand == "+", genes$start, genes$end)
+counts <- annotationCounts(rs, genes, 10000, 2500, 300)
+head(counts)
+
+myInterestingRegions <- data.frame(chr = c("chr2", "chr7"), start = c(500000, 1000000), end = c(550000, 1005000), strand = c('+', '-'), name = c("Region 1", "Region 2"))
+myInterestingRegions
+counts <- annotationBlocksCounts(rs, myInterestingRegions, 200)
+counts
+@
+
+\section{Future Directions}
+Add something here.
+
+\section{Utility Functions}
+\texttt{Repitools} contains a few useful functions to get the array data in a biologically useful form.
+
+\subsection{Calculating CpG Density of Specific Regions}
+To look at the CpG density of some specific regions, the \texttt{cpgDensityCalc} function is used. This simple function has two arguments; \texttt{locationsTable} and \texttt{windowSize}. The parameter \texttt{locationsTable} is a data frame with two columns, \texttt{chr} and \texttt{position}. The number \texttt{windowSize} is how many bases upstream and downstream of position to take into account for the calculation. The density is calculated by linearly scaling down CpG sites as they become further away from \texttt{position}.
+\\ \\
+\textbf{Example:}
+
+<<cpgDens>>=
+myLocations <- data.frame(chr=c("chr1", "chr17"), position=c(100000, 250000))
+library(BSgenome.Hsapiens.UCSC.hg18)
+cpgDensityCalc(myLocations, 500, organism=Hsapiens)
+@
+
+\subsection{Reading Nimblegen Data Quickly}
+Using other packages usually requires definition text files or specific directory structures. The reading has been streamlined with the function \texttt{loadSampleDirectory}, which loads all .pair files is a specified directory. The first argument, \texttt{path} is the path of the directory where the .pair files are located. Additionally, the parameter \texttt{ndf} gives a data frame representation of the releveant Nimblegen Data File, which is the output from the \texttt{processNDF} function. The \texttt{what} argument is a great time - saver. It describes how to process the intensities as they are being read into the matrix. The strings that can be passed in for this argument and their effects are:
+\begin{center}
+	\begin{tabular}{|c|p{12cm}|}
+		\hline
+		\textbf{String} & \textbf{Effect} \\
+		\hline
+		Cy3 & The matrix will have the $log_2$ intensity of the green channel for each array. \\
+		\hline
+		Cy5 & The matrix will have the $log_2$ intensity of the red channel for each array. \\
+		\hline
+		Cy3/Cy5 & The matrix will have the $log_2$ of the ratio of the green channel to the red channel. \\
+		\hline
+		Cy5/Cy3 & The matrix will have the $log_2$ of the ratio of the red channel to the green channel. \\
+		\hline
+		Cy3andCy5 & The matrix will have two columns for each array, the first being the $log_2$ of the green channel, and the next being the $log_2$ of the red channel. \\
+		\hline
+		Cy5andCy3 & The matrix will have two columns for each array, the first being the $log_2$ of the red channel, and the next being the $log_2$ of the green channel. \\
+		\hline
+	\end{tabular}
+\end{center}
+
+\textbf{Example:}
+
+<<expression>>=
+#tilingProbePositions <- getProbePositionsDf(cdfTableUniquePositions)
+#genePositions <- data.frame(chr = annotation$chr, position = annotation$start, strand = annotation$strand, #stringsAsFactors = FALSE)
+#negStrand <- genePositions$strand == "-"
+#genePositions$position[negStrand] <- annotation$end[negStrand]
+#rownames(genePositions) <- annotation$name
+@
+
+
+This establishes two tables, one for the position of tiling probes, and one for the position of gene starts. The next step is to use the \texttt{Repitools} function \texttt{annotationLookup} to form a mapping between the TSSs and the probes on the tiling array. In the following example, the region around each TSS matched to probes is 7500 bases upstream and 2500 bases downstream.
+\\ \\
+
+<<lookup>>=
+#probesNearTSS <- annotationLookup(tilingProbePositions, genePositions, 7500, 2500)
+@
+
+The \texttt{indexes} element contains a list of indices that mapped to within the TSS region given. Use these indexes to create a smaller probe positions table, which is then used to create a smaller mapping. Doing it like this means less memory is used.
+\\ \\
+\textbf{Example:}
+
+<<subsetlookup>>=
+#probeIndices <- unique(unlist(probesNearTSS$indexes, use.names = FALSE))
+#tilingProbePositions <- tilingProbePositions[probeIndices, ]
+#probesNearTSS <- annotationLookup(tilingProbePositions, genePositions, 7500, 2500)
+@
+
+Next, the indices for each TSS region must be organised into a table, which is done with the \texttt{makeWindowLookupTable} function, and the tiling array probes to use are extracted.
+\\ \\
+\textbf{Example:}
+
+<<windowlookup>>=
+#lookupTable <- makeWindowLookupTable(probesNearTSS$indexes, probesNearTSS$offsets, starts = seq(-7500, 2400, 100), #ends = seq(-7400, 2500, 100))
+#smoothedScoresToUse <- log2(extractMatrix(MATSmoothedScores, cells = tilingProbePositions$index))
+@
+
+
+\section{Environment}
+This user manual was run through \texttt{Sweave} and the $\mathbb{R}$ environment had the following conditions:
+
+<<sInfo>>=
+sessionInfo()
+@
+
+\end{document}
+

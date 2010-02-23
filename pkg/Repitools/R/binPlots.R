@@ -1,4 +1,6 @@
-setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="ref", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...) {
+setMethodS3("binPlots", "GenomeDataList", function(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="lane", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...) {
+	coordinatesTable$position <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
+	rownames(coordinatesTable) <- coordinatesTable$name
 	if(libSize == "ref" && is.null(Acutoff))
 		stop("Must give value of Acutoff if using \"ref\" normalisation.\n")
 	blockPos <- seq.int(-upStream, downStream, by)
@@ -45,16 +47,14 @@ setMethodS3("binPlots", "AffymetrixCelSet", function(cs, probeMap=NULL, coordina
 	if (is.null(probeMap)) {
 		if (is.null(coordinatesTable)) stop("Either probeMap or coordinatesTable must be supplied!")
 		probePositions <- getProbePositionsDf( getCdf(cs), verbose=verbose )
-		pos <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
-		genePositions <- data.frame(chr=coordinatesTable$chr, position=pos, 
-				strand=coordinatesTable$strand, row.names=coordinatesTable$name,
-				stringsAsFactors=FALSE)
+		coordinatesTable$position <- ifelse(coordinatesTable$strand=="+", coordinatesTable$start, coordinatesTable$end)
+		rownames(coordinatesTable) <- coordinatesTable$name
 			
 		# run lookup twice.  first to get a list of smaller list of probes to use
-		annot <- annotationLookup(probePositions, genePositions, upStream+bw, downStream+bw, verbose=verbose)
+		annot <- annotationLookup(probePositions, coordinatesTable, upStream+bw, downStream+bw, verbose=verbose)
 		pb <- unique(unlist(annot$indexes, use.names=FALSE))
 		probePositions <- probePositions[pb,]
-		annot <- annotationLookup(probePositions, genePositions, upStream+bw, downStream+bw, verbose=verbose)
+		annot <- annotationLookup(probePositions, coordinatesTable, upStream+bw, downStream+bw, verbose=verbose)
 		lookupT <- makeWindowLookupTable(annot$indexes, annot$offsets,
 				starts = seq(-upStream-bw, downStream-bw, by), ends = seq(-upStream+bw, downStream+bw, by))
 	} else {

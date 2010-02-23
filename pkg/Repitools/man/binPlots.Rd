@@ -8,7 +8,7 @@
 Using a specified ordering of genes, they are split into multiple bins.  In each bin, the signal across is summarized and displayed visually.  The plots are created in an array, one row for each column of the data matrix and one column for each ordering specified.
 }
 \usage{
-\method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="ref", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...)
+\method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="lane", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...)
 \method{binPlots}{AffymetrixCelSet}(cs, probeMap=NULL, coordinatesTable=NULL, upStream=7500, downStream=2500, by=100, bw=300, log2adjust=TRUE, verbose=FALSE, ...)
 \method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
 }

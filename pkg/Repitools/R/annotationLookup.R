@@ -97,7 +97,7 @@ annotationBlocksCounts <- function(rs, annotation, seqLen=NULL, verbose=TRUE) {
 	for (i in 1:length(rs)) {
 		if (!class(rs[[i]][[1]])=="IRanges") {
 			if (is.null(seqLen)) stop("If rs has not been extended, seqLen must be supplied")
-			rs[[i]] <- extendReads(rs[[i]], seqLen=seqLen)
+			rs[[i]] <- chipseq::extendReads(rs[[i]], seqLen=seqLen)
 		}
     if(verbose)
       cat(names(rs)[i], ":", sep="")
