@@ -171,23 +171,23 @@ The expression data is first put through a standard robust multichip analysis. T
 
 
 <<binPlots1, eval=FALSE>>=
-lookupT <- binPlots(csTS, coordinatesTable=genes, orderingList=list("PrEC Expression"=emE[,"PrEC"], "LNCaP Expression"=emE[,"LNCaP"], "LNCaP-PrEC Expression"=emE[,"LNCaP-PrEC"]), plotType="line", nbins=10)
+lookupT <- binPlots(csTS, coordinatesTable=genes, ordering=emE, plotType="line", nbins=10)
 #aroma.affymetrix maintenance
 getNames <- function(...) UseMethod("getNames")
 @
 
 <<binPlots1a, fig=TRUE, echo=FALSE>>=
-lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="line", nbins=10)
+lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, ordering=emE[,"PrEC", drop=FALSE], plotType="line", nbins=10)
 #aroma.affymetrix maintenance
 getNames <- function(...) UseMethod("getNames")
 @
 
 <<binPlots1b, fig=TRUE, echo=FALSE>>=
-binPlots(extract(csTS,2), probeMap=lookupT, orderingList=list("LNCaP Expression"=emE[,"LNCaP"]), plotType="line", nbins=10)
+binPlots(extract(csTS,2), probeMap=lookupT, ordering=emE[,"LNCaP", drop=FALSE], plotType="line", nbins=10)
 @
 
 <<binPlots1c, fig=TRUE, echo=FALSE>>=
-binPlots(extract(csTS,3), probeMap=lookupT, orderingList=list("LNCaP-PrEC Expression"=emE[,"LNCaP-PrEC"]), plotType="line", nbins=10)
+binPlots(extract(csTS,3), probeMap=lookupT, ordering=emE[,"LNCaP-PrEC", drop=FALSE], plotType="line", nbins=10)
 @
 
 The first time \texttt{binPlots} is called, it will create a mapping between the gene positions supplied and the probes on the tiling array, which is returned. Keeping this mapping and passing it to subsequent \texttt{binPlots} calls as the \texttt{probeMap} parameter will massively speed up plotting.
@@ -195,15 +195,15 @@ The first time \texttt{binPlots} is called, it will create a mapping between the
 The \texttt{binPlots} functions also can plot a \texttt{heatmap} or \texttt{terrain} map, both of which benefit from an increase to the \texttt{nBins} argument.
 
 <<binPlots2, fig=TRUE>>=
-binPlots(extract(csTS,1), probeMap=lookupT, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="heatmap", nbins=50)
+binPlots(extract(csTS,1), probeMap=lookupT, ordering=emE[,"PrEC", drop=FALSE], plotType="heatmap", nbins=50)
 @
 
 <<binPlots3, fig=TRUE>>=
-binPlots(extract(csTS,1), probeMap=lookupT, orderingList=list("PrEC Expression"=emE[,"PrEC"]), plotType="terrain", nbins=50)
+binPlots(extract(csTS,1), probeMap=lookupT, ordering=emE[,"PrEC", drop=FALSE], plotType="terrain", nbins=50)
 @
 
 <<binPlots4, fig=TRUE>>=
-binPlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP IP", drop=FALSE], orderingList=list("LNCaP Expression"=emE[,"LNCaP"]), plotType="heatmap", nbins=50, seqLen=300, libSize="lane")
+binPlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP IP", drop=FALSE], ordering=emE[,"LNCaP", drop=FALSE], plotType="heatmap", nbins=50, seqLen=300, libSize="lane")
 @
 
 \subsection{Graphical Comparison of Epigenetic Marks vs. Random Sampling}
@@ -214,13 +214,13 @@ Sometimes, there may be a known set of genes of interest (for example, a set of 
 <<sigGraphs1, fig=TRUE>>=
 geneList <- list("Upregulated Genes" = which(emE[,"LNCaP-PrEC"] > 1), 
                  "Downregulated Genes" = which(emE[,"LNCaP-PrEC"] < -1))
-significanceGraphs(extract(csTS, 3), probeMap=lookupT, geneList=geneList, titles="H3K9ac Change Across Promoters")
+significancePlots(extract(csTS, 3), probeMap=lookupT, geneList=geneList, titles="H3K9ac Change Across Promoters")
 @
 
 And again for sequencing data:
 
 <<sigGraphs2, fig=TRUE>>=
-significanceGraphs(rs, coordinatesTable=genes, design=designSeq[,"LNCaP-PrEC IP", drop=FALSE], geneList=geneList, seqLen=300, titles="IP Change Across Promoters")
+significancePlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP-PrEC IP", drop=FALSE], geneList=geneList, seqLen=300, titles="IP Change Across Promoters")
 @
 
 \subsection{Visualisation of Different Microarray Experiments Side by Side}
