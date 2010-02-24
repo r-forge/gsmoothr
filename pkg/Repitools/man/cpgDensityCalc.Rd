@@ -5,7 +5,7 @@
 \description{Function to calculate CpG density around a position.
 }
 \usage{
-cpgDensityCalc(locationsTable, windowSize=500, wFunction="linear", organism)
+cpgDensityCalc(locationsTable, windowSize=500, wFunction=c("linear", "exp", "log", "none"), organism)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
