@@ -1,5 +1,6 @@
 cpgDensityCalc <- function(locationsTable, windowSize=500, wFunction=c("linear","exp","log","none"), organism)
 {
+	wFunction <- match.arg(wFunction)
 	if(any(locationsTable$position < (windowSize / 2)))
 		stop("Not all locations' windows are obtainable. Remove locations that are too close to the edge of the start of chromosomes.")
 
@@ -14,18 +15,20 @@ cpgDensityCalc <- function(locationsTable, windowSize=500, wFunction=c("linear",
 	}
 	
 	cpgDensity <- numeric()
-	sequences <- do.call(getSeq, list(x = organism, names = locationsTable$chr, start = locationsTable$position - windowSize / 2, end = locationsTable$position + windowSize / 2))
+	sequences <- do.call(getSeq, list(x = organism, names = locationsTable$chr, start = locationsTable$position - (windowSize / 2) + 1, end = locationsTable$position + windowSize / 2))
 	CGfinds <- gregexpr("CG", sequences, fixed = TRUE)
+	#gregexpr returns -1 for no CG matches.
+	CGfinds <- lapply(CGfinds, function(CGinRegion) sapply(CGinRegion, function(pos) ifelse(pos < 0, 0, pos)))
 	if(wFunction == "none") {
-		cpgDensity <- sapply(CGfinds, length)
+		cpgDensity <- sapply(CGfinds, length)	
 	} else {
 		distances <- lapply(CGfinds, function(positionsInRegion) {abs(positionsInRegion - windowSize / 2)})
 		if(wFunction == "linear") {
-			cpgDensity <- sapply(distances, function(distancesInRegion) sum(1 - (distancesInRegion / windowSize / 2)))
+			cpgDensity <- sapply(distances, function(distancesInRegion) sum(1 - (distancesInRegion / (windowSize / 2))))
 		} else if(wFunction == "log") {
-			cpgDensity <- sapply(distances, function(distancesInRegion) sum(log2(2 - (distancesInRegion / windowSize / 2))))
+			cpgDensity <- sapply(distances, function(distancesInRegion) sum(log2(2 - (distancesInRegion / (windowSize / 2)))))
 		} else { # Exponential decay was requested.
-			cpgDensity <- sapply(distances, function(distancesInRegion) sum(exp(-5 * distancesInRegion / windowSize / 2)))	
+			cpgDensity <- sapply(distances, function(distancesInRegion) sum(exp(-5 * distancesInRegion / (windowSize / 2))))	
 		}
 	}
 	rm(sequences, CGfinds)

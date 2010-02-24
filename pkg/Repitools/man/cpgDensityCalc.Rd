@@ -10,7 +10,7 @@ cpgDensityCalc(locationsTable, windowSize=500, wFunction=c("linear", "exp", "log
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{locationsTable}{A \code{data.frame}, with columns \code{chr} and \code{position}.}
-  \item{windowSize}{Bases around the locations that are in the window. Calculation will consider \code{windowSize / 2} bases upstream, and \code{windowSize / 2} bases downstream.}
+  \item{windowSize}{Bases around the locations that are in the window. Calculation will consider \code{windowSize / 2 - 1} bases upstream, and \code{windowSize / 2} bases downstream.}
   \item{wFunction}{Weighting function to use. Can be \code{none}, \code{linear}, \code{log}, or \code{exp}}
   \item{organism}{The \code{BSgenome} object to calculate CpG density upon.}
 }

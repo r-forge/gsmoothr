@@ -8,11 +8,11 @@ mappabilityCalc(locationsTable, windowSize = 500, organism)
 }
 \arguments{
   \item{locationsTable}{A \code{data.frame}, with columns \code{chr} and \code{position}.}
-  \item{windowSize}{Bases around the locations that are in the window. Calculation will consider \code{windowSize} bases upstream, and \code{windowSize} bases downstream.}
+  \item{windowSize}{Bases around the locations that are in the window. Calculation will consider \code{windowSize / 2 - 1} bases upstream, and \code{windowSize / 2} bases downstream.}
   \item{organism}{The \code{BSgenome} object to calculate mappability upon.}
 }
 \details{
-The windows considered will be \code{windowSize / 2} bases upstream and downstream of the given position, for each position. The value returned for each region is a percentage of bases in that region that are not N (any base in IUPAC nomenclature).
+The windows considered will be \code{windowSize / 2 - 1} bases upstream and \code{windowSize / 2} bases downstream of the given position, for each position. The value returned for each region is a percentage of bases in that region that are not N (any base in IUPAC nomenclature).
 }
 \value{
   A vector of mappability percentages, one for each region.

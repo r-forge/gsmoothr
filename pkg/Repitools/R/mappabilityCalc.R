@@ -18,7 +18,7 @@ mappabilityCalc <- function(locationsTable, windowSize = 500, organism)
 	{
 		currentLocations <- locationsByChr[[chromosomeIndex]]
 		currentSeq <- organism[[names(locationsByChr)[chromosomeIndex]]]
-		mapScores[[chromosomeIndex]] <- sapply(currentLocations, function(currentPosition){indices <- (currentPosition - windowSize) : (currentPosition + windowSize); 1-alphabetFrequency(currentSeq[indices], as.prob=TRUE)[["N"]]})
+		mapScores[[chromosomeIndex]] <- sapply(currentLocations, function(currentPosition){indices <- (currentPosition - windowSize / 2 + 1) : (currentPosition + windowSize / 2); 1-alphabetFrequency(currentSeq[indices], as.prob=TRUE)[["N"]]})
 	}
 
 	return(unsplit(mapScores, locationsTable$chr))
