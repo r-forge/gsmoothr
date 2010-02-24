@@ -10,7 +10,7 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
 \usage{
 \method{binPlots}{GenomeDataList}(rs, coordinatesTable, design=NULL, upStream=7500, downStream=2500, by=100, bw=300, libSize="lane", seqLen=NULL, verbose=FALSE, Acutoff=NULL, ...)
 \method{binPlots}{AffymetrixCelSet}(cs, probeMap=NULL, coordinatesTable=NULL, upStream=7500, downStream=2500, by=100, bw=300, log2adjust=TRUE, verbose=FALSE, ...)
-\method{binPlots}{matrix}(dataMatrix, lookupTable, orderingList, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
+\method{binPlots}{matrix}(dataMatrix, lookupTable, ordering, plotType = c("line", "heatmap", "terrain", "boxplot"), nbins = 10, cols = NULL, lwd = 3, lty = 1, sameScale = TRUE, symmScale = FALSE, verbose = FALSE, removeZeros=TRUE, useMean=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,7 +21,7 @@ Using a specified ordering of genes, they are split into multiple bins.  In each
   \item{coordinatesTable}{\code{data.frame} giving the gene coordinates or regions of interest. The column names of this are \code{chr}, \code{name}, \code{start}, \code{end}, \code{strand}.}
   \item{lookupTable}{\code{matrix}, e.g. from \code{makeWindowLookupTable}}
   \item{design}{Optional for GDL data - design matrix specifying the contrast to compute (i.e. the samples to use and what differences to take)}
-  \item{orderingList}{\code{list} of either numeric or factor variables, of the same length as the number of rows in \code{lookupTable}}
+  \item{ordering}{\code{data.frame} of either numeric or factor variables, with the same number of rows as \code{lookupTable}}
   \item{plotType}{type of plot}
   \item{nbins}{number of bins}
   \item{cols}{vector of colours}

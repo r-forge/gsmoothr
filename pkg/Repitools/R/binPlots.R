@@ -71,17 +71,15 @@ setMethodS3("binPlots", "AffymetrixCelSet", function(cs, probeMap=NULL, coordina
 })
 
 
-setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, useMean=FALSE, ...) {
+setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, ordering, plotType=c("line","heatmap","terrain","boxplot"), nbins=10, cols=NULL, lwd=3, lty=1, sameScale=TRUE, symmScale=FALSE, verbose=FALSE, removeZeros=TRUE, useMean=FALSE, ...) {
   def.par <- par(no.readonly = TRUE) # save default, for resetting...
   plotType <- match.arg(plotType)
-  
-  if(!length(orderingList) == ncol(dataMatrix)) {
-    if (!length(orderingList) == 1)
-      stop("orderingList must be either length 1 or as long as the number of columns in dataMatrix.")
+  if(!ncol(ordering) == ncol(dataMatrix)) {
+    if (!ncol(ordering) == 1)
+      stop("ordering must have either 1 column or the same number of columns as dataMatrix.")
       orderingIndex <- rep(1, ncol(dataMatrix))
   } else orderingIndex <- 1:ncol(dataMatrix)
 
-  
   if( is.null(cols) ) {
     require(gplots)
 	if(plotType=="line") {
@@ -91,7 +89,7 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 	}
   }
   
-  label <- vector("list", length(orderingList))
+  label <- vector("list", ncol(ordering))
   .makeBins <- function(u) {
     if(class(u)=="numeric") {
       br <- quantile(u,p=(0:nbins)/nbins)
@@ -101,14 +99,16 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 	  list(breakpoints=u, intervals=u)
 	}
   }
-  for(index in 1:length(orderingList))
+  
+  for(i in 1:ncol(ordering))
   {
-	if(class(orderingList[[index]])=="numeric")
-		label[[index]] <- " Order:"
-	else if (class(orderingList[[index]])=="factor")
-		label[[index]] <- " Factor:"
+	if(class(ordering[,i])=="numeric")
+		label[[i]] <- " Order:"
+	else if (class(ordering[,i])=="factor")
+		label[[i]] <- " Factor:"
   }
-  breaks <- lapply(orderingList, .makeBins)
+  
+  breaks <- apply(ordering, 2, .makeBins)
   if( plotType %in% c("line","heatmap","terrain")) {
     intensScores <- array(NA,dim=c(ncol(dataMatrix), ncol(lookupTable), nbins),
 	                      dimnames=list(colnames(dataMatrix),colnames(lookupTable),NULL))
@@ -117,11 +117,11 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
 	for(i in 1:length(intensScores))
 		intensScores[[i]] <- vector("list", length(levels(breaks[[orderingIndex[i]]][["intervals"]])))
   }
-
+  
   xval <- as.numeric(colnames(lookupTable))
 
   for(i in 1:ncol(dataMatrix)) {
-	if (verbose) cat(names(orderingList)[orderingIndex[i]],": ",sep="")
+	if (verbose) cat(colnames(ordering)[orderingIndex[i]],": ",sep="")
 	cutLevels <- levels( breaks[[orderingIndex[i]]][["intervals"]] )
 
 	
@@ -162,7 +162,7 @@ setMethodS3("binPlots", "matrix", function(dataMatrix, lookupTable, orderingList
           if (symmScale) rng <- c(-max(abs(rng)),max(abs(rng)))
         }
 
-	titName <- paste("Signal:", colnames(dataMatrix)[i], label[orderingIndex[i]], names(orderingList)[orderingIndex[i]], sep="")
+	titName <- paste("Signal:", colnames(dataMatrix)[i], label[orderingIndex[i]], colnames(ordering)[orderingIndex[i]], sep="")
 	if(plotType=="line")
 	{
 		  layout(rbind(c(1, 2)), widths=c(3,2))

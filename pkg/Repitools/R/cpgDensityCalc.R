@@ -1,5 +1,10 @@
 cpgDensityCalc <- function(locationsTable, windowSize=500, wFunction=c("linear","exp","log","none"), organism)
 {
+	gregexpr.2 <- function(...) sapply(gregexpr(...), function(x) {
+					if (x[1]=="-1") return(integer(0))
+					else return(x)
+				}, USE.NAMES = FALSE)
+
 	wFunction <- match.arg(wFunction)
 	if(any(locationsTable$position < (windowSize / 2)))
 		stop("Not all locations' windows are obtainable. Remove locations that are too close to the edge of the start of chromosomes.")
@@ -15,10 +20,8 @@ cpgDensityCalc <- function(locationsTable, windowSize=500, wFunction=c("linear",
 	}
 	
 	cpgDensity <- numeric()
-	sequences <- do.call(getSeq, list(x = organism, names = locationsTable$chr, start = locationsTable$position - (windowSize / 2) + 1, end = locationsTable$position + windowSize / 2))
-	CGfinds <- gregexpr("CG", sequences, fixed = TRUE)
-	#gregexpr returns -1 for no CG matches.
-	CGfinds <- lapply(CGfinds, function(CGinRegion) sapply(CGinRegion, function(pos) ifelse(pos < 0, 0, pos)))
+	sequences <- getSeq(x = organism, names = locationsTable$chr, start = locationsTable$position - (windowSize / 2) + 1, end = locationsTable$position + windowSize / 2)
+	CGfinds <- gregexpr.2("CG", sequences, fixed = TRUE)
 	if(wFunction == "none") {
 		cpgDensity <- sapply(CGfinds, length)	
 	} else {
