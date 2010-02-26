@@ -16,7 +16,7 @@ setMethodS3("cpgDensityCalc", "GenomeData", function(rs, seqLen, ...) {
 			
 })
 
-setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, shift=TRUE, ...) {
+setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, ...) {
 	gregexpr.2 <- function(...) sapply(gregexpr(...), function(x) {
 					if (x[1]=="-1") return(integer(0))
 					else return(x)
@@ -25,15 +25,23 @@ setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFun
 	wFunction <- match.arg(wFunction)
 
 	chr.length <- seqlengths(organism)
-	if(any((locations$position<window/2) | (locations$position+window/2>chr.length[locations$chr]))) {
-		if (!shift) stop("Not all locations' windows are within chromosome boundaries")
-		warning("Not all locations' windows are within chromosome boundaries, shifting.")
-		locations$position[locations$position<window/2] <- window/2
-		locations$position <- ifelse((locations$position+window/2)>chr.length[locations$chr], chr.length[locations$chr]-window/2, locations$position)
-	}
+	if (any((locations$position<window/2) | (locations$position+window/2>chr.length[locations$chr])))
+		warning("Not all locations' windows are within chromosome boundaries.")
 
-	sequences <- getSeq(x = organism, names = locations$chr, start = locations$position - (window / 2) + 1, end = locations$position + window / 2)
-	CGfinds <- gregexpr.2("CG", sequences, fixed = TRUE)
+	CGpattern <- DNAString("CG")
+	CGfinds <- vector(mode='list', length=nrow(locations))
+	for (chr in unique(locations$chr)) {
+		thisChr <- which(locations$chr==chr)
+		chrseq <- organism[[chr]]
+		CGmatches <- start(matchPattern(CGpattern, chrseq))
+		CG.IRanges <- IRanges(start=CGmatches, width=1)
+		loc.IRanges <- IRanges(start=locations$position[thisChr]-window/2+1, end=locations$position[thisChr]+window/2)
+		loc.overlaps <- findOverlaps(query=CG.IRanges, subject=loc.IRanges)
+		loc.overlaps <- tapply(loc.overlaps@matchMatrix[,1], loc.overlaps@matchMatrix[,2], list)
+		thisChr2 <- thisChr[as.integer(names(loc.overlaps))]
+		temp <- mapply(function(x,y) CGmatches[x]-y+window/2, loc.overlaps, locations$position[thisChr2])
+		CGfinds[thisChr2] <- temp
+	}
 	if(wFunction == "none") {
 		cpgDensity <- sapply(CGfinds, length)	
 	} else {
@@ -46,7 +54,7 @@ setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFun
 			cpgDensity <- sapply(distances, function(distancesInRegion) sum(exp(-5 * distancesInRegion / (window / 2))))	
 		}
 	}
-	rm(sequences, CGfinds)
+	rm(CGfinds)
 	gc()
 	return(cpgDensity)
 })

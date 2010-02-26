@@ -8,4 +8,5 @@ setMethodS3("cpgDensityPlot", "GenomeDataList", function(rs, cols=rainbow(length
 		lines(x=rs.den[[i]]$x, y=rs.den[[i]]$y, col=cols[i])
 	}
 	legend("topright", lty=1, col=cols, legend=names(rs))
+	invisible(rs.cpg)
 })

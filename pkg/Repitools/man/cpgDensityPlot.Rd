@@ -19,7 +19,7 @@
   See \code{cpgDensityCalc} for details of options for calculating the CpG density.
 }
 \value{
-  A plot is created.
+  A plot is created. The data processed by \code{cpgDensityCalc} is invisibly returned. 
 }
 \author{Aaron Statham}
 \examples{

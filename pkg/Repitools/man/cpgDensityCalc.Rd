@@ -10,7 +10,7 @@
 \usage{
 \method{cpgDensityCalc}{GenomeDataList}(rs, seqLen, ...)
 \method{cpgDensityCalc}{GenomeData}(rs, seqLen, ...)
-\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, shift=TRUE, ...)
+\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,7 +18,6 @@
   \item{window}{Bases around the locations that are in the window. Calculation will consider \code{windowSize / 2 - 1} bases upstream, and \code{windowSize / 2} bases downstream.}
   \item{wFunction}{Weighting function to use. Can be \code{none}, \code{linear}, \code{log}, or \code{exp}}
   \item{organism}{The \code{BSgenome} object to calculate CpG density upon.}
-  \item{shift}{If a location is not within the bounds of it's chromosome, whether to shift it to within the bounds automatically, or stop execution.}
   \item{rs}{A \code{GenomeData} or \code{GenomeDataList} object.}
   \item{seqLen}{The fragment size of the sequence reads in \code{rs}, doubles as the \code{window} to be used.}
   \item{...}{Arguments passed into the \code{data.frame} method}
