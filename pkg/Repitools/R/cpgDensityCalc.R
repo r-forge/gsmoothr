@@ -16,7 +16,7 @@ setMethodS3("cpgDensityCalc", "GenomeData", function(rs, seqLen, ...) {
 			
 })
 
-setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, ...) {
+setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, ...) {
 	gregexpr.2 <- function(...) sapply(gregexpr(...), function(x) {
 					if (x[1]=="-1") return(integer(0))
 					else return(x)
@@ -31,6 +31,7 @@ setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFun
 	CGpattern <- DNAString("CG")
 	CGfinds <- vector(mode='list', length=nrow(locations))
 	for (chr in unique(locations$chr)) {
+		if (verbose) cat(chr, " ")
 		thisChr <- which(locations$chr==chr)
 		chrseq <- organism[[chr]]
 		CGmatches <- start(matchPattern(CGpattern, chrseq))
@@ -38,10 +39,12 @@ setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFun
 		loc.IRanges <- IRanges(start=locations$position[thisChr]-window/2+1, end=locations$position[thisChr]+window/2)
 		loc.overlaps <- findOverlaps(query=CG.IRanges, subject=loc.IRanges)
 		loc.overlaps <- tapply(loc.overlaps@matchMatrix[,1], loc.overlaps@matchMatrix[,2], list)
+		if (length(loc.overlaps)==0) next
 		thisChr2 <- thisChr[as.integer(names(loc.overlaps))]
-		temp <- mapply(function(x,y) CGmatches[x]-y+window/2, loc.overlaps, locations$position[thisChr2])
+		temp <- mapply(function(x,y) CGmatches[x]-y+window/2, loc.overlaps, locations$position[thisChr2], SIMPLIFY=FALSE)
 		CGfinds[thisChr2] <- temp
 	}
+	if (verbose) cat("\n")
 	if(wFunction == "none") {
 		cpgDensity <- sapply(CGfinds, length)	
 	} else {

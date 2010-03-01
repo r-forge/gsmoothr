@@ -10,7 +10,7 @@
 \usage{
 \method{cpgDensityCalc}{GenomeDataList}(rs, seqLen, ...)
 \method{cpgDensityCalc}{GenomeData}(rs, seqLen, ...)
-\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, ...)
+\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +20,7 @@
   \item{organism}{The \code{BSgenome} object to calculate CpG density upon.}
   \item{rs}{A \code{GenomeData} or \code{GenomeDataList} object.}
   \item{seqLen}{The fragment size of the sequence reads in \code{rs}, doubles as the \code{window} to be used.}
+  \item{verbose}{Print details of processing.}
   \item{...}{Arguments passed into the \code{data.frame} method}
 }
 \details{
