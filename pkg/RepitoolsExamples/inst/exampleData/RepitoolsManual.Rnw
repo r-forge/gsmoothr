@@ -63,7 +63,7 @@ library(Repitools)
 library(RepitoolsExamples)
 library(limma)
 library(aroma.affymetrix)
-library(BSgenome)
+library(BSgenome.Hsapiens.UCSC.hg18)
 @
 
 \section{Setting up the aroma.affymetrix environment}
@@ -158,6 +158,13 @@ cpgBoxplots(csTU, samples = c(1,2), gcContent = 12, nBins = 10)
 <<cpgBP2, fig=TRUE>>=
 cpgBoxplots(csTU, samples = c(2,1), gcContent = 12, nBins = 10, calcDiff = TRUE)
 @
+
+The function \texttt{cpgDensityPlot} uses \texttt{cpgDensityCalc} on sequencing data to examine the CpG density of reads, which is a useful quality control step for methylated DNA enrichment experiments. 
+
+<<cpgSeq, fig=TRUE>>=
+cpgDensityPlot(rs, seqLen=300, organism=Hsapiens)
+@
+
 
 \subsection{Binned Plots}
 Binned plots are a way of exploring the relationship between tiling array data
@@ -324,7 +331,6 @@ To look at the CpG density of some specific regions, the \texttt{cpgDensityCalc}
 
 <<cpgDens>>=
 myLocations <- data.frame(chr=c("chr1", "chr17"), position=c(100000, 250000))
-library(BSgenome.Hsapiens.UCSC.hg18)
 cpgDensityCalc(myLocations, 500, organism=Hsapiens)
 @
 
