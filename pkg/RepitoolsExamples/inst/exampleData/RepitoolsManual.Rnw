@@ -25,9 +25,8 @@
 \maketitle
 
 \section{Introduction}
-\texttt{Repitools} is an R package to assist with the analysis of datasets typically found in epigenetics research; that is, those of a high dimensionality. The main focus of the package is the analysis of tiling and expression arrays. Functionality for Affymetrix and Nimblegen platforms is present. To keep this manual concise, the example used will be on some Affymetrix data. However, the functions are simple to use on Nimblegen data too, usually with the only difference being an extra parameter being given. Consult the help page of each function for how to use it on Nimblegen data. Additionally, simple analysis of next - generation sequencing data is also possible. Also, there are many options for each function, and just the main options are covered in this user manual.
+\texttt{Repitools} is an R package to assist with the analysis of datasets typically found in epigenetics research. The main focus of the package is creating summarys of promoter tiling arrays and simple analyses of next generation sequencing, in the context of gene expression data.  Functionality for Affymetrix promoter arrays and Solexa sequencing data is presented.  However, the functions are simple to use on Nimblegen data too, usually with the only difference being an extra parameter being given.  Consult the help page of each function for how to use it on Nimblegen data.  There are many options for each function, and just the main options are covered in this user manual.
 \\ \\
-The abilities of the package will be illustrated through a series of examples.
 
 \section{Getting the \texttt{Repitools} Package} 
 The package can be acquired by running the command
@@ -67,19 +66,21 @@ library(BSgenome.Hsapiens.UCSC.hg18)
 @
 
 \section{Setting up the aroma.affymetrix environment}
-Repitools uses the \texttt{aroma.affymetrix} package, which requires data and their annotations to be in a specific directory structure, which must be writable by the end-user. The \texttt{RepitoolsExamples} package has the included example data files laid out correctly, and can be setup by executing
+For the analysis of Affymetrix tiling arrays, Repitools makes heavy use of the \texttt{aroma.affymetrix} package, which requires data and their annotations to be in a specific directory structure (and must be writable by the end-user). The \texttt{RepitoolsExamples} package has the included example data files laid out correctly, and can be setup by executing:
 <<aromaSetup1>>=
 setupExamples()
 @
-Or, if you wish to copy the example data into the current working directory (for instance if the package has been installed system-wide into a non-writable location), execute instead
+Or, if you wish to copy the example data into the current working directory (for instance if the package has been installed system-wide into a non-writable location), execute instead:
 <<aromaSetup2, eval=FALSE>>=
 setupExamples(doCopy=TRUE)
 @
+For further information, consult the documentation for aroma.affymetrix at \href{http://aroma-project.org/}{http://aroma-project.org/} and specifically the vignette \href{'MAT: (Promoter 1.0R) Tiling array analysis'}{http://aroma-project.org/node/39}.
 
 \section{Reading the example data}
-The data used in these examples are largely from our recent paper\footnote{Marcel W. Coolen, Clare Stirzaker, Jenny Z. Song, Aaron L. Statham, Zena Kassir, Carlos S. Moreno, Andrew N. Young, Vijay Varma, Terence P. Speed, Mark Cowley, Paul Lacaze, Warren Kaplan, Mark D. Robinson and Susan J. Clark (2010) Consolidation of the cancer genome into domains of repressive chromatin by long-range epigenetic silencing (LRES) reduces transcriptional plasticity. \textit{Nature Cell Biology}} where we integrated expression and epigenetic data of normal prostate epithelial cells (PrEC) and the LNCaP prostate cancer cell line. The example data includes Affymetrix Human Promoter 1.0R tiling arrays from a histone H3K9 acetylation chromatin immunoprecipitation experiment, matching Affymetrix Human Gene 1.0ST expression arrays, and Illumina sequencing libraries. 
+The data used in these examples are largely from our recent paper\footnote{Coolen et al. (2010) Consolidation of the cancer genome into domains of repressive chromatin by long-range epigenetic silencing (LRES) reduces transcriptional plasticity. \textit{Nature Cell Biology}} where we integrated expression and epigenetic data of normal prostate epithelial cells (PrEC) and the LNCaP prostate cancer cell line. The example data includes Affymetrix Human Promoter 1.0R tiling arrays from a histone H3K9 acetylation chromatin immunoprecipitation experiment, with matching Affymetrix Human Gene 1.0ST expression arrays, and Illumina sequencing libraries. 
 
-Now, a design matrix, and references to the CDF file and CEL set are created. The CEL set is MAT normalised and MAT smoothed \footnote{Johnson W.E., Li W., Meyer CA., Gottardo R., Carroll J.S., Brown M., and Liu X.S. (2006) Model-based analysis of tiling-arrays for ChIP-chip. \textit{Proc. Natl. Acad. Sci. USA} 103: 12457-12462}.
+First, a design matrix, which specifies the difference ('contrast') of interest, and references to the chip definition file (CDF) and CEL files (containing the data) are created. Generally, the set of CEL files is MAT normalised and smoothed \footnote{Johnson et al. (2006) Model-based analysis of tiling-arrays for ChIP-chip. \textit{Proc. Natl. Acad. Sci. USA} 103: 12457-12462}, here using the \texttt{aroma.affymetrix} implementation.  Some operations take place directly on the normalized data while some analyses may make use of the smoothed values.
+
  
 <<readCelCdf>>=
 #aroma.affymetrix housekeeping
@@ -105,7 +106,7 @@ MS <- MatSmoothing(csTMNU, design = design, probeWindow = 300, tag = "300bp_smoo
 csTS <- process(MS, units = NULL)
 @
 
-Next, perform a standard Robust Multixchip Analyis (RMA) \footnote{Irizarry R. A., Bolstad B. M., Collin F., Cope L. M., Hobbs, B., Speed, T.P. (2003) Summaries of Affymetrix GeneChip probe level data \textit{Nucleic Acids Research} 31(4):e15} on the example expression data.
+Next, we perform a standard Robust Multixchip Analyis (RMA) \footnote{Irizarry et al. (2003) Summaries of Affymetrix GeneChip probe level data \textit{Nucleic Acids Research} 31(4):e15} on the example expression data.
 
 <<RmaExpressionSteps>>=
 cdfE <- AffymetrixCdfFile$byChipType("HuGene-1_0-st-v1")
@@ -121,19 +122,29 @@ em <- log2(extractMatrix(ces))
 rownames(em) <- getUnitNames(cdfE)
 @
 
-Next, read in the the positions of human genes (this was adapted from the annotation provided by Affymetrix for their HuGene 1.0ST array platform).
+Next, we read in the positions of human genes with identifiers matched up to the Gene 1.0 ST 
+platform (this was adapted from the annotation provided by Affymetrix):
 <<readCsv>>=
 genes <- read.csv("annotationData/humanGenomeAnnotation.csv")
 em <- em[match(genes$name, rownames(em)),]
+head(genes)
+@
+
+We form a design matrix to specify the average expression levels, or differential expression between LNCaP and PrEC cells:
+<<designMat>>=
 designE <- cbind("PrEC"=c(0, 0, 0.5, 0.5),
                 "LNCaP"=c(0.5, 0.5, 0, 0),
            "LNCaP-PrEC"=c(0.5, 0.5, -0.5, -0.5))
 rownames(designE) <- getNames(csE)
 print(designE)
+@
+
+We apply the design matrix to each gene (to give a gene-level score for each contrast):
+<<setupProbeScores>>=
 emE <- em %*% designE
 @
 
-Finally, load the sequencing data. It has been stored compactly in a \texttt{BSgenome::GenomeDataList} object only containing the chromosome, strand and start position of each read (details on how to import data into this format are in the appendix). 
+Finally, we load the sequencing data. It has been stored compactly in a \texttt{BSgenome::GenomeDataList} object only containing the chromosome, strand and start position of each read (details on how to import data into this format are in the appendix).  This data is unpublished so we describe it here as just "IP" for each cell line, but we make it available in order to illustrate the examples.  Further information will be made available when published, but the details are not important for illustrating the Repitools package.
 
 <<>>=
 load("rawData/sequencing/seq_data.Rdata")
@@ -147,43 +158,34 @@ print(designSeq)
 
 \section{Data Summaries}
 
-\subsection{Plotting Bias Due to CpG Density}
-The function \texttt{cpgBoxplots} is used to create boxplots of intensities, binned by the CpG density surrounding 600 bases of the probe. A range of probe GC content can be given, via the \texttt{gcContent} parameter, to narrow down analysis to probes with GC content in a certain range. Each level of GC content is plotted in a separate graph. The \texttt{samples} parameter must be a vector of length 2, that gives the columns of the intensity matrix to use. The number of bins that the CpG density is binned into is controlled with the \texttt{nBins} parameter. Setting the parameter \texttt{calcDiff} to \textbf{TRUE} will create a single plot of the difference of the first sample in the sample vector to the second sample.
+\subsection{cpgBoxplots and cpgDensityPlot -- Plotting Bias/Enrichment related to CpG Density}
+The function \texttt{cpgBoxplots} is used to create boxplots of intensity, with probes stratified by GC content and then grouped by the CpG density surrounding 600 bases of each probe (in our examples, we use a window of 600 bases, but this can be tailored to a given experiment). A range of probe GC content can be given, via the \texttt{gcContent} parameter, to narrow down analysis to probes with GC content in a certain range. Each level of GC content is plotted in a separate graph. The \texttt{samples} parameter must be a vector of length 2, that gives the columns of the intensity matrix to use. The number of bins that the CpG density is binned into is controlled with the \texttt{nBins} parameter. Setting the parameter \texttt{calcDiff} to \textbf{TRUE} will create a single plot of the difference of the first sample in the sample vector to the second sample.
 \\ \\
 \textbf{Examples:}
-<<cpgBP1, fig=TRUE>>=
-cpgBoxplots(csTU, samples = c(1,2), gcContent = 12, nBins = 10)
+<<cpgBP1, fig=TRUE, width=7, height=5>>=
+cpgBoxplots(csTU, samples = c(2,1), gcContent = 11, nBins = 50)
 @
 
-<<cpgBP2, fig=TRUE>>=
-cpgBoxplots(csTU, samples = c(2,1), gcContent = 12, nBins = 10, calcDiff = TRUE)
+<<cpgBP2, fig=TRUE, width=7, height=5>>=
+cpgBoxplots(csTU, samples = c(2,1), gcContent = 12, nBins = 50, calcDiff = TRUE)
 @
 
-The function \texttt{cpgDensityPlot} uses \texttt{cpgDensityCalc} on sequencing data to examine the CpG density of reads, which is a useful quality control step for methylated DNA enrichment experiments. 
+The function \texttt{cpgDensityPlot} uses \texttt{cpgDensityCalc} (see Section "Utility Functions") on sequencing data to examine the CpG density distribution of reads, a useful quality control step for methylated DNA enrichment experiments. 
 
-<<cpgSeq, fig=TRUE>>=
+<<cpgSeq, fig=TRUE, width=7, height=5>>=
 cpgDensityPlot(rs, seqLen=300, organism=Hsapiens)
 @
 
 
-\subsection{Binned Plots}
-Binned plots are a way of exploring the relationship between tiling array data
+\subsection{binPlots -- average signal proximal to annotation in bins}
 
-It is possible to bin the tiling array data by the level of expression from another array experiment. The first type of plot to visualise this relationship with is the lineplot. Each line is a different expression bin, and the y-axis is the level of the mark measured by the tiling array. The other type of plot is the heatmap, where the y-axis is the level of expression, and the colour of the square is the level of mark.
+Binned plots are a way of exploring the relationship between epigenomic signals and some external measure.  For example, it is possible to bin the tiling array or sequencing data by the level of expression and visualize the signal across a region up- and downstream of the transcription start sites. There are three types of visualization: lineplots, heatmaps and "terrain" diagrams.
 \\ \\
-The expression data is first put through a standard robust multichip analysis. Then, the following steps are needed to match the tiling array probes to relative positions around the TSSs of the expression data.
+We use expression data processed through RMA from above (the '\texttt{em}' data.frame) and use the table of annotation (the 'genes' data.frame).
 \\ \\
+The first time \texttt{binPlots} is called, it will create a mapping between the gene positions supplied and the probes on the tiling array, which is returned. Keeping this mapping and passing it to subsequent \texttt{binPlots} calls as the \texttt{probeMap} parameter will speed up plotting.  Here are some examples:
 
-\textbf{Example:}
-
-
-<<binPlots1, eval=FALSE>>=
-lookupT <- binPlots(csTS, coordinatesTable=genes, ordering=emE, plotType="line", nbins=10)
-#aroma.affymetrix maintenance
-getNames <- function(...) UseMethod("getNames")
-@
-
-<<binPlots1a, fig=TRUE, echo=FALSE>>=
+<<binPlots1a, fig=TRUE>>=
 lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, ordering=emE[,"PrEC", drop=FALSE], plotType="line", nbins=10)
 #aroma.affymetrix maintenance
 getNames <- function(...) UseMethod("getNames")
@@ -197,7 +199,6 @@ binPlots(extract(csTS,2), probeMap=lookupT, ordering=emE[,"LNCaP", drop=FALSE], 
 binPlots(extract(csTS,3), probeMap=lookupT, ordering=emE[,"LNCaP-PrEC", drop=FALSE], plotType="line", nbins=10)
 @
 
-The first time \texttt{binPlots} is called, it will create a mapping between the gene positions supplied and the probes on the tiling array, which is returned. Keeping this mapping and passing it to subsequent \texttt{binPlots} calls as the \texttt{probeMap} parameter will massively speed up plotting.
 
 The \texttt{binPlots} functions also can plot a \texttt{heatmap} or \texttt{terrain} map, both of which benefit from an increase to the \texttt{nBins} argument.
 
