@@ -13,7 +13,7 @@ annotationBlocksLookup <- function(probes, annotation, probeIndex=NULL, verbose=
 		anno.overlaps <- findOverlaps(query=probes.IRanges, subject=annotation.IRanges)
 		anno.overlaps <- tapply(anno.overlaps@matchMatrix[,1], anno.overlaps@matchMatrix[,2], list)
 		annotProbes$indexes[as.integer(names(anno.overlaps))] <- anno.overlaps
-		annotProbes$offsets <- mapply(function(x ,y) probePositions[x]-y, annotProbes$indexes, annotation$start)
+		annotProbes$offsets <- mapply(function(x ,y) probePositions[x]-y, annotProbes$indexes, annotation$start, SIMPLIFY = FALSE)
 		annotProbes$indexes <- lapply(annotProbes$indexes, function(x) as.integer(names(probePositions[x])))
 		return(annotProbes)
   }
