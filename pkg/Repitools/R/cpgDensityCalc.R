@@ -22,7 +22,7 @@ setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFun
 	if(wFunction == "none") {
 		cpgDensity <- sequenceCalc(locations	, window, organism, DNAString("CG"), verbose=verbose)
 	} else {
-		CGfinds <- sequenceCalc(locationsTable, window, organism, DNAString("CG"), verbose=verbose, positions=TRUE)
+		CGfinds <- sequenceCalc(locations, window, organism, DNAString("CG"), verbose=verbose, positions=TRUE)
 		distances <- lapply(CGfinds, function(positionsInRegion) {abs(positionsInRegion)})
 		if(wFunction == "linear") {
 			cpgDensity <- sapply(distances, function(distancesInRegion) sum(1 - (distancesInRegion / (window / 2))))

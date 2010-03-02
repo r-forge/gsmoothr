@@ -1,10 +1,10 @@
-\name{gcDensityCalc}
-\alias{gcDensityCalc}
+\name{gcContentCalc}
+\alias{gcContentCalc}
 \title{Calculate the GC content of regions}
 \description{Function to calculate GC content of windows surrounding the given positions.
 }
 \usage{
-gcDensityCalc(locations, window = 500, organism, verbose=FALSE)
+gcContentCalc(locations, window = 500, organism, verbose=FALSE)
 }
 \arguments{
   \item{locations}{A \code{data.frame}, with columns \code{chr} and \code{position}.}
@@ -20,8 +20,8 @@ The windows considered will be \code{windowSize / 2 - 1} bases upstream and \cod
 }
 \author{Dario Strbenac}
 \examples{
-require(BSgenome.Hsapiens.UCSC)
+require(BSgenome.Hsapiens.UCSC.hg18)
 TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
-gcDensityCalc(TSSTable, 200, organism=Hsapiens)
+gcContentCalc(TSSTable, 200, organism=Hsapiens)
 }
 
