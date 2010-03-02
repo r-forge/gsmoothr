@@ -162,19 +162,36 @@ print(designSeq)
 The function \texttt{cpgBoxplots} is used to create boxplots of intensity, with probes stratified by GC content and then grouped by the CpG density surrounding 600 bases of each probe (in our examples, we use a window of 600 bases, but this can be tailored to a given experiment). A range of probe GC content can be given, via the \texttt{gcContent} parameter, to narrow down analysis to probes with GC content in a certain range. Each level of GC content is plotted in a separate graph. The \texttt{samples} parameter must be a vector of length 2, that gives the columns of the intensity matrix to use. The number of bins that the CpG density is binned into is controlled with the \texttt{nBins} parameter. Setting the parameter \texttt{calcDiff} to \textbf{TRUE} will create a single plot of the difference of the first sample in the sample vector to the second sample.
 \\ \\
 \textbf{Examples:}
+
+\setkeys{Gin}{width=7in}
 <<cpgBP1, fig=TRUE, width=7, height=5>>=
 cpgBoxplots(csTU, samples = c(2,1), gcContent = 11, nBins = 50)
 @
+\setkeys{Gin}{width=\Gwidth}
 
+\setkeys{Gin}{width=7in}
 <<cpgBP2, fig=TRUE, width=7, height=5>>=
 cpgBoxplots(csTU, samples = c(2,1), gcContent = 12, nBins = 50, calcDiff = TRUE)
 @
+\setkeys{Gin}{width=\Gwidth}
 
 The function \texttt{cpgDensityPlot} uses \texttt{cpgDensityCalc} (see Section "Utility Functions") on sequencing data to examine the CpG density distribution of reads, a useful quality control step for methylated DNA enrichment experiments. 
 
+\setkeys{Gin}{width=7in}
 <<cpgSeq, fig=TRUE, width=7, height=5>>=
-cpgDensityPlot(rs, seqLen=300, organism=Hsapiens)
+
+takeSample <- function(rs, f=.1) {
+  gdapply(rs, function(x) {
+    p <- x[["+"]]
+    n <- x[["-"]]
+    list( "+"=sample(p, f*length(p)), "-"=sample(n, f*length(n)) )
+  })
+}
+
+rsSub <- takeSample(rs, f=.01)  # take 1 percent of the reads
+cpgDensityPlot(rsSub, seqLen=300, organism=Hsapiens)
 @
+\setkeys{Gin}{width=\Gwidth}
 
 
 \subsection{binPlots -- average signal proximal to annotation in bins}
@@ -185,51 +202,67 @@ We use expression data processed through RMA from above (the '\texttt{em}' data.
 \\ \\
 The first time \texttt{binPlots} is called, it will create a mapping between the gene positions supplied and the probes on the tiling array, which is returned. Keeping this mapping and passing it to subsequent \texttt{binPlots} calls as the \texttt{probeMap} parameter will speed up plotting.  Here are some examples:
 
-<<binPlots1a, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots1a, fig=TRUE, width=7, height=5>>=
 lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, ordering=emE[,"PrEC", drop=FALSE], plotType="line", nbins=10)
 #aroma.affymetrix maintenance
 getNames <- function(...) UseMethod("getNames")
 @
+\setkeys{Gin}{width=\Gwidth}
 
-<<binPlots1b, fig=TRUE, echo=FALSE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots1b, fig=TRUE, echo=FALSE, width=7, height=5>>=
 binPlots(extract(csTS,2), probeMap=lookupT, ordering=emE[,"LNCaP", drop=FALSE], plotType="line", nbins=10)
 @
+\setkeys{Gin}{width=\Gwidth}
 
-<<binPlots1c, fig=TRUE, echo=FALSE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots1c, fig=TRUE, echo=FALSE, width=7, height=5>>=
 binPlots(extract(csTS,3), probeMap=lookupT, ordering=emE[,"LNCaP-PrEC", drop=FALSE], plotType="line", nbins=10)
 @
+\setkeys{Gin}{width=\Gwidth}
 
 
 The \texttt{binPlots} functions also can plot a \texttt{heatmap} or \texttt{terrain} map, both of which benefit from an increase to the \texttt{nBins} argument.
 
-<<binPlots2, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots2, fig=TRUE, width=7, height=5>>=
 binPlots(extract(csTS,1), probeMap=lookupT, ordering=emE[,"PrEC", drop=FALSE], plotType="heatmap", nbins=50)
 @
+\setkeys{Gin}{width=\Gwidth}
 
-<<binPlots3, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots3, fig=TRUE, width=7, height=5>>=
 binPlots(extract(csTS,1), probeMap=lookupT, ordering=emE[,"PrEC", drop=FALSE], plotType="terrain", nbins=50)
 @
+\setkeys{Gin}{width=\Gwidth}
 
-<<binPlots4, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<binPlots4, fig=TRUE, width=7, height=5>>=
 binPlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP IP", drop=FALSE], ordering=emE[,"LNCaP", drop=FALSE], plotType="heatmap", nbins=50, seqLen=300, libSize="lane")
 @
+\setkeys{Gin}{width=\Gwidth}
 
 \subsection{Graphical Comparison of Epigenetic Marks vs. Random Sampling}
 Sometimes, there may be a known set of genes of interest (for example, a set of genes highly expressed under a certain condition). A number of graphs comparing the epigenetic marks of these genes, versus a random sample of genes, can be created in the one command. Each treatent forms a column of the data matrix \texttt{dataMatrix} and the rows correspond to probes. Additionally, a lookup table via the parameter \texttt{lookupTable} must be supplied that maps the probes to genes. The genes of interest are given in the list \texttt{geneList}. Each element of the list can either be a logical vector for each gene, or alternatively, could be an integer vector specifying the rows of the data matrix that are of interest. The confidence interval defaults to 95\%, but can be user - defined through the parameter \texttt{confidence}, which is $ {x : x \in \mathbb{R},  0.5 < x < 1.0}$. The parameter \texttt{nSamples} determines how many probes will be sampled for the null distribution.
 \\ \\
 \textbf{Example:}
 
-<<sigGraphs1, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<sigGraphs1, fig=TRUE, width=7, height=5>>=
 geneList <- list("Upregulated Genes" = which(emE[,"LNCaP-PrEC"] > 1), 
                  "Downregulated Genes" = which(emE[,"LNCaP-PrEC"] < -1))
 significancePlots(extract(csTS, 3), probeMap=lookupT, geneList=geneList, titles="H3K9ac Change Across Promoters")
 @
+\setkeys{Gin}{width=\Gwidth}
 
 And again for sequencing data:
 
-<<sigGraphs2, fig=TRUE>>=
+\setkeys{Gin}{width=7in}
+<<sigGraphs2, fig=TRUE, width=7, height=5>>=
 significancePlots(rs, coordinatesTable=genes, design=designSeq[,"LNCaP-PrEC IP", drop=FALSE], geneList=geneList, seqLen=300, titles="IP Change Across Promoters")
 @
+\setkeys{Gin}{width=\Gwidth}
 
 \subsection{Visualisation of Different Microarray Experiments Side by Side}
 Displaying the heatmaps of arrays under different conditions side by side may help to show key differences in an intuitive way. The multiHeatmap function provides this facility. The data is passed in via the parameter \texttt{dataList}, which is a list of matrices. Each matrix is a different heatmap, and each column in a particular matrix corresponds to a column of a heatmap. A list of colurscales can be given by the parameter \texttt{colourList}. Each heatmap can have its own title, passed in as a list via the parameter \texttt{titles}. The multiheatmap can also have an overall title, which is given by the parameter \texttt{main}.
@@ -256,9 +289,11 @@ col <- colorpanel(low="blue",mid="white",high="red",n=100)
 cList[[1]] <- list(breaks=br,colors=col)
 @
 
-<<multiHeatmap, fig = TRUE>>=
+\setkeys{Gin}{width=7in}
+<<multiHeatmap, fig = TRUE, width=7, height=5>>=
 multiHeatmap(list(K9Ac = K9AcSTAT, K9Acrandom = K9AcRandomSTAT), cList, c("K9Ac in LREA genes", "K9Ac in Random"), cwidth = 1, xspace = 5)
 @
+\setkeys{Gin}{width=\Gwidth}
 
 
 \section{Global Analysis of Epigenetic Marks}
