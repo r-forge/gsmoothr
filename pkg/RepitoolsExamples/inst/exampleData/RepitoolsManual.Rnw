@@ -8,13 +8,13 @@
 \usepackage[tableposition=top]{caption}
 \usepackage{ifthen}
 \usepackage[utf8]{inputenc}
-\topmargin 0in
+\topmargin -.5in
 \headheight 0in
 \headsep 0in
-\oddsidemargin 0in
-\evensidemargin 0in
+\oddsidemargin -.5in
+\evensidemargin -.5in
 \textwidth 176mm
-\textheight 215mm
+\textheight 245mm
 
 \usepackage{color}
 \usepackage{Sweave}
