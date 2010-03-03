@@ -4,7 +4,7 @@
 \title{Find occurences of a DNA pattern}
 \description{Function to find all occurrences of a DNA pattern in given locations.}
 \usage{
-sequenceCalc(locations, window = 500, organism, pattern, fixed=TRUE, Nmask=FALSE, positions=FALSE, verbose=FALSE)
+sequenceCalc(locations, window=500, organism, pattern, fixed=TRUE, Nmask=FALSE, positions=FALSE, verbose=FALSE, chunkSize=10000000)
 }
 \arguments{
   \item{locations}{A \code{data.frame}, with columns \code{chr} and \code{position}.}
@@ -15,7 +15,7 @@ sequenceCalc(locations, window = 500, organism, pattern, fixed=TRUE, Nmask=FALSE
   \item{Nmask}{Whether to mask out Ns in the \code{organism} sequence before searching - recommended when \code{fixed=FALSE}.} 
   \item{positions}{If \code{TRUE}  \code{FALSE}}
   \item{verbose}{Print details of processing.}
-  \item{...}{Arguments passed into the \code{data.frame} method}
+  \item{chunkSize}{The number of basepairs to process in a chunk, lower amounts use less memory, higher amounts may be faster}
 }
 \details{
   }

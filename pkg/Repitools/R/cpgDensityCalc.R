@@ -16,11 +16,11 @@ setMethodS3("cpgDensityCalc", "GenomeData", function(rs, seqLen, ...) {
 			
 })
 
-setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, ...) {
+setMethodS3("cpgDensityCalc", "data.frame", function(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, chunkSize=10000000, ...) {
 	wFunction <- match.arg(wFunction)
 
 	if(wFunction == "none") {
-		cpgDensity <- sequenceCalc(locations, window, organism, DNAString("CG"), verbose=verbose)
+		cpgDensity <- sequenceCalc(locations, window, organism, DNAString("CG"), verbose=verbose, chunkSize=chunkSize)
 	} else {
 		CGfinds <- sequenceCalc(locations, window, organism, DNAString("CG"), verbose=verbose, positions=TRUE)
 		distances <- lapply(CGfinds, function(positionsInRegion) {if(!is.null(positionsInRegion)) abs(positionsInRegion)})

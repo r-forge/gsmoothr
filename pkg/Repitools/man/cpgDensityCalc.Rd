@@ -10,7 +10,7 @@
 \usage{
 \method{cpgDensityCalc}{GenomeDataList}(rs, seqLen, ...)
 \method{cpgDensityCalc}{GenomeData}(rs, seqLen, ...)
-\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, ...)
+\method{cpgDensityCalc}{data.frame}(locations, window=500, wFunction=c("linear","exp","log","none"), organism, verbose=FALSE, chunkSize=10000000, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +21,7 @@
   \item{rs}{A \code{GenomeData} or \code{GenomeDataList} object.}
   \item{seqLen}{The fragment size of the sequence reads in \code{rs}, doubles as the \code{window} to be used.}
   \item{verbose}{Print details of processing.}
+  \item{chunkSize}{The number of basepairs to process in a chunk, lower amounts use less memory, higher amounts may be faster}
   \item{...}{Arguments passed into the \code{data.frame} method}
 }
 \details{
