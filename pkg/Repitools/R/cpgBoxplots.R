@@ -131,7 +131,6 @@ setMethodS3("cpgBoxplots", "AffymetrixCelSet", function(this, ..., samples=c(1,2
   verbose && enter(verbose, "Reading and binning Cpg data");
   acc <- AromaCellCpgFile$byChipType(getChipType(cdf))
   cpgDens <- acc[indices,1,drop=TRUE]
-  print(summary(cpgDens))
   bins <- .createBins(cpgDens, nBins)
   verbose && exit(verbose);
 
