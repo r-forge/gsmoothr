@@ -119,13 +119,12 @@ annotationBlocksCounts <- function(rs, annotation, seqLen=NULL, verbose=TRUE) {
 annotationCounts <- function(rs, annotation, bpUp, bpDown, seqLen=NULL, verbose=TRUE) {
 	require(chipseq)
 	if (class(rs)=="GenomeData") rs <- GenomeDataList(list(rs))
-
+	if (is.null(annotation$strand)) annotation$strand <- "+"
+	if (is.null(annotation$name)) annotation$name <- 1:nrow(annotation)
 	anno <- data.frame(chr=annotation$chr,
-                           start=
-                        ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
-                           end=
-                        ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
-                           name=annotation$name)
+                     start=ifelse(annotation$strand=="+", annotation$position-bpUp, annotation$position-bpDown), 
+                       end=ifelse(annotation$strand=="+", annotation$position+bpDown, annotation$position+bpUp),
+                      name=annotation$name)
 	annotationBlocksCounts(rs, anno, seqLen, verbose)
 }
 
