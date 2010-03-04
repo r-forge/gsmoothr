@@ -21,8 +21,8 @@ The windows considered will be \code{windowSize / 2 - 1} bases upstream and \cod
 }
 \author{Dario Strbenac}
 \examples{
-require(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
-TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
-mappabilityCalc(TSSTable, 200, organism=Hsapiens36bp)
+# require(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
+# TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
+# mappabilityCalc(TSSTable, 200, organism=Hsapiens36bp)
 }
 
