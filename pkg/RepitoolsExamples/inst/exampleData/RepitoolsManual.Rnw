@@ -189,8 +189,10 @@ takeSample <- function(rs, f=.1) {
   })
 }
 
-rsSub <- takeSample(rs, f=.01)  # take 1 percent of the reads
+rsSub <- takeSample(rs, f=.1)  # take 10 percent of the reads
+
 cpgDensityPlot(rsSub, seqLen=300, organism=Hsapiens)
+#cpgDensityPlot(rsSub, seqLen=300, organism=Hsapiens, verbose=TRUE)
 @
 \setkeys{Gin}{width=\Gwidth}
 
@@ -211,13 +213,13 @@ lookupT <- binPlots(extract(csTS,1), coordinatesTable=genes, ordering=emE[,"PrEC
 \setkeys{Gin}{width=\Gwidth}
 
 \setkeys{Gin}{width=7in}
-<<binPlots1b, fig=TRUE, echo=FALSE, width=7, height=5>>=
+<<binPlots1b, fig=TRUE, width=7, height=5>>=
 binPlots(extract(csTS,2), probeMap=lookupT, ordering=emE[,"LNCaP", drop=FALSE], plotType="line", nbins=10)
 @
 \setkeys{Gin}{width=\Gwidth}
 
 \setkeys{Gin}{width=7in}
-<<binPlots1c, fig=TRUE, echo=FALSE, width=7, height=5>>=
+<<binPlots1c, fig=TRUE, width=7, height=5>>=
 binPlots(extract(csTS,3), probeMap=lookupT, ordering=emE[,"LNCaP-PrEC", drop=FALSE], plotType="line", nbins=10)
 @
 \setkeys{Gin}{width=\Gwidth}
@@ -298,7 +300,7 @@ This the IGB view of the top differentially K9Ac enriched TSS on the forward str
 At present, there is no analogous \texttt{regionStats} procedure for sequencing-based data.
 
 \section{Targeted analysis of epigenetic marks}
-Rather than looking across the entire genome (or entire region represented on a tiling microarray), one can target the analysis to regions of interest (e.g. promoters). The \texttt{blocksStats} procedure is a general-purpose tool for this. The function works in one of two modes. If the parameter \texttt{useAsRegions} is set to \textbf{TRUE}, the \texttt{start} and \texttt{end} columns of the \texttt{coordinatesTable} are used as the regions to consider. Otherwise, the start of the region of interest (e.g. transcription start site) is chosen based on the \texttt{strand} column, and the region to use for calculation is defined by the region that starts a number of bases upstream, defined by the parameter \texttt{upStream}, and a number of bases downstream, defined by the parameter  \texttt{downStream}. The minimum number of probes that must be present in a defined region for statistics calculations to be carried out is given by the parameter \texttt{minNRobust}. \\
+Rather than looking across the entire genome (or entire region represented on a tiling microarray), one can target the analysis to regions of interest (e.g. promoters). The \texttt{blocksStats} procedure is a general-purpose tool for this. The function works in one of two modes. If the parameter \texttt{useAsRegions} is set to \texttt{TRUE}, the \texttt{start} and \texttt{end} columns of the \texttt{coordinatesTable} are used as the regions to consider. Otherwise, the start of the region of interest (e.g. transcription start site) is chosen based on the \texttt{strand} column, and the region to use for calculation is defined by the region that starts a number of bases upstream, defined by the parameter \texttt{upStream}, and a number of bases downstream, defined by the parameter  \texttt{downStream}. The minimum number of probes that must be present in a defined region for statistics calculations to be carried out is given by the parameter \texttt{minNRobust}. \\
 
 Columns for Region-level statistics are added to the input \texttt{coordinatesTable} data.frame, including the average difference of probes in that specified region, t-statistics, p-values and adjusted p-values for each column of the design matrix.
 \\ \\
@@ -309,7 +311,7 @@ o <- order(bs$pvals.LNCaP.PrEC)
 head(bs[o,])
 @
 
-Quite conveniently, the same function can also be used to perform statistical analysis on sequencing data. The sequencing results are first read into a \texttt{GenomeDataList} object. There are two additional options that become available for \texttt{blocksStats} when it is being used to analyse sequencing data. The \texttt{seqLen} parameter can be used to extend the aligned reads to a certain length. Since the fragments of DNA sequenced are usually longer than the reads given by the experimental procedure, this single number argument will extend all reads based on where in the genome they align to, so that they all are \texttt{seqLen} in length.  The other argument specific to sequencing is \texttt{total.lib.size}, which is a boolean value that specifies whether to use the total number of reads genome - wide (using the \texttt{laneCounts} function), or the total number of reads falling within the starts and ends as described by \texttt{coordinatesTable}, as the library size for statistical calculations. If it is \textbf{TRUE}, the library size will the the number of reads in the whole genome. \textbf{FALSE} will mean that the number of reads in the coorinatesTable regions will be taken as the library size. The design matrix needs to be modified, since \texttt{edgeR} does pairwise comparisons. Treatments should have 1, controls -1, and others 0.\\
+Quite conveniently, the same function can also be used to perform statistical analysis on sequencing data. The sequencing results are first read into a \texttt{GenomeDataList} object. There are two additional options that become available for \texttt{blocksStats} when it is being used to analyse sequencing data. The \texttt{seqLen} parameter can be used to extend the aligned reads to a certain length. Since the fragments of DNA sequenced are usually longer than the reads given by the experimental procedure, this single number argument will extend all reads based on where in the genome they align to, so that they all are \texttt{seqLen} in length.  The other argument specific to sequencing is \texttt{total.lib.size}, which is a boolean value that specifies whether to use the total number of reads genome - wide (using the \texttt{laneCounts} function), or the total number of reads falling within the starts and ends as described by \texttt{coordinatesTable}, as the library size for statistical calculations. If it is \texttt{TRUE}, the library size will the the number of reads in the whole genome. \texttt{FALSE} will mean that the number of reads in the coorinatesTable regions will be taken as the library size. The design matrix needs to be modified, since \texttt{edgeR} does pairwise comparisons. Treatments should have 1, controls -1, and others 0.\\
 
 The \texttt{regionStats} procedure for sequencing data will return (library size) quantile-normalized counts and statistics for differential expression from the edgeR functions.
 \\ \\
@@ -335,10 +337,10 @@ counts
 @
 
 \section{Utility Functions}
-\texttt{Repitools} contains a few useful functions to get the array data in a biologically useful form.
+\texttt{Repitools} contains a number of generally useful functions.
 
 \subsection{Calculating CpG Density of Specific Regions}
-To calculate the CpG density of specific regions of the genome, the \texttt{cpgDensityCalc} function can be used. This simple function has two arguments; \texttt{locationsTable} and \texttt{windowSize}. The parameter \texttt{locationsTable} is a data frame with two columns, \texttt{chr} and \texttt{position}. The number \texttt{windowSize} is how many bases upstream and downstream of position to take into account for the calculation. The density is calculated by linearly scaling down CpG sites as they become further away from \texttt{position}.
+To calculate the CpG density of specific regions of the genome, the \texttt{cpgDensityCalc} function can be used. The parameter \texttt{locationsTable} can be a data frame with two columns, \texttt{chr} and \texttt{position}. The number \texttt{windowSize} is how many bases upstream and downstream of position to take into account for the calculation. You can weight the CpGs as a function of distance to the centre of the region of interest, if desired.
 \\ \\
 \textbf{Example:}
 
@@ -369,47 +371,13 @@ Using other packages usually requires definition text files or specific director
 	\end{tabular}
 \end{center}
 
-\textbf{Example:}
+\subsection{Visualization of multiple heatmaps}
 
-<<expression>>=
-#tilingProbePositions <- getProbePositionsDf(cdfTableUniquePositions)
-#genePositions <- data.frame(chr = annotation$chr, position = annotation$start, strand = annotation$strand, #stringsAsFactors = FALSE)
-#negStrand <- genePositions$strand == "-"
-#genePositions$position[negStrand] <- annotation$end[negStrand]
-#rownames(genePositions) <- annotation$name
-@
-
-
-This establishes two tables, one for the position of tiling probes, and one for the position of gene starts. The next step is to use the \texttt{Repitools} function \texttt{annotationLookup} to form a mapping between the TSSs and the probes on the tiling array. In the following example, the region around each TSS matched to probes is 7500 bases upstream and 2500 bases downstream.
-\\ \\
-
-<<lookup>>=
-#probesNearTSS <- annotationLookup(tilingProbePositions, genePositions, 7500, 2500)
-@
-
-The \texttt{indexes} element contains a list of indices that mapped to within the TSS region given. Use these indexes to create a smaller probe positions table, which is then used to create a smaller mapping. Doing it like this means less memory is used.
-\\ \\
-\textbf{Example:}
-
-<<subsetlookup>>=
-#probeIndices <- unique(unlist(probesNearTSS$indexes, use.names = FALSE))
-#tilingProbePositions <- tilingProbePositions[probeIndices, ]
-#probesNearTSS <- annotationLookup(tilingProbePositions, genePositions, 7500, 2500)
-@
-
-Next, the indices for each TSS region must be organised into a table, which is done with the \texttt{makeWindowLookupTable} function, and the tiling array probes to use are extracted.
-\\ \\
-\textbf{Example:}
-
-<<windowlookup>>=
-#lookupTable <- makeWindowLookupTable(probesNearTSS$indexes, probesNearTSS$offsets, starts = seq(-7500, 2400, 100), #ends = seq(-7400, 2500, 100))
-#smoothedScoresToUse <- log2(extractMatrix(MATSmoothedScores, cells = tilingProbePositions$index))
-@
-
+See the \textt{multiHeatmap} example and documentation for the creating multi-panel heatmaps allowing complete control over colour scales and spacing between.  
 
 \section{Future Directions}
 
-Analyses of next-generation sequencing data, especially for epigenomic data, are in thier infancy.  Further implementations will be made available in the near future.  Experiments are encouraged to provide feedback on the implemented routines as well as suggestions for further procedures.
+Analyses of next-generation sequencing data, especially for epigenomic data, are in their infancy.  Further implementations will be made available in the near future.  Experiments are encouraged to provide feedback on the implemented routines as well as suggestions for further procedures.
 
 
 \section{Environment}
