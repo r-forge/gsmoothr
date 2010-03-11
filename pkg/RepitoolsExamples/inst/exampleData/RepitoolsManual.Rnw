@@ -371,7 +371,7 @@ Using other packages usually requires definition text files or specific director
 
 \subsection{Visualization of multiple heatmaps}
 
-See the \textt{multiHeatmap} example and documentation for the creating multi-panel heatmaps allowing complete control over colour scales and spacing between.  
+See the \texttt{multiHeatmap} example and documentation for the creating multi-panel heatmaps allowing complete control over colour scales and spacing between.  
 
 \section{Future Directions}
 
