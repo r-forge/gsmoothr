@@ -35,13 +35,11 @@ The package can be acquired by running the command:
 install.packages("Repitools", repos = "http://r-forge.r-project.org")
 @
 
-To get the data to use with these examples, type:
+To get the data to use with these examples, download the \texttt{RepitoolsExamples} package from the R-Forge website:
 
-<<eval=FALSE>>=
-install.packages("RepitoolsExamples", repos = "http://r-forge.r-project.org")
-@
+\href{http://repitools.r-forge.r-project.org/}{http://repitools.r-forge.r-project.org/}
 
-It can then be loaded by calling the function \texttt{setupExamples()}, after the package has been loaded into R (see below).
+and install the package using \texttt{install.packages()}.  It can then be loaded by calling the function \texttt{setupExamples()}, after the package has been loaded into R (see below).
 
 \texttt{Repitools} also depends on a number of packages, depending on the functions used. These include:
 

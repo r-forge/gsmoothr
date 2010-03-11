@@ -1,0 +1,1 @@
+nohup R CMD BATCH --no-save buildManual.R &
