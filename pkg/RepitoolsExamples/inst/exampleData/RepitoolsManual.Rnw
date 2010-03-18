@@ -143,7 +143,7 @@ We apply the design matrix to each gene (to give a gene-level score for each con
 emE <- em %*% designE
 @
 
-Finally, we load sequencing data for a different experiment. It has been stored compactly in a \texttt{BSgenome::GenomeDataList} object only containing the chromosome, strand and start position of each read (details on how to import data into this format are in the appendix).  This data is unpublished so we describe it here as just "IP" for each cell line, but we make it available in order to illustrate the examples.  Further information will be made available when published, but the details are not important for illustrating the Repitools package.
+Finally, we load sequencing data for a different experiment. It has been stored compactly in a \texttt{BSgenome::GenomeDataList} object only containing the chromosome, strand and start position of each read (details on how to import data into this format are in the Section "Utility Functions").  This data is unpublished so we describe it here as just "IP" for each cell line, but we make it available in order to illustrate the examples.  Further information will be made available when published, but the details are not important for illustrating the Repitools package.
 
 <<>>=
 load("rawData/sequencing/seq_data.Rdata")
@@ -191,6 +191,16 @@ rsSub <- takeSample(rs, f=.1)  # take 10 percent of the reads
 
 cpgDensityPlot(rsSub, seqLen=300, organism=Hsapiens)
 #cpgDensityPlot(rsSub, seqLen=300, organism=Hsapiens, verbose=TRUE)
+@
+\setkeys{Gin}{width=\Gwidth}
+
+\subsection{enrichmentPlot -- Plotting Enrichment over the whole genome}
+Similarly, \texttt{enrichmentPlot} (which uses \texttt{enrichmentCalc}) can plot the distribution of enrichment over the whole genome, useful for quality control of any enrichment-based sequencing experiment. 
+
+\setkeys{Gin}{width=7in}
+<<enrichmentSeq, fig=TRUE, width=7, height=5>>=
+
+enrichmentPlot(rsSub, seqLen=300, organism=Hsapiens, verbose=TRUE)
 @
 \setkeys{Gin}{width=\Gwidth}
 
@@ -336,6 +346,23 @@ counts
 
 \section{Utility Functions}
 \texttt{Repitools} contains a number of generally useful functions.
+
+\subsection{Importing Next Generation Sequencing Data}
+After alignment of Next Generation Sequencing data to the genome of interest by an external tool (e.g Bowtie, bwa, maq, ELAND etc) we need to import the data into R for analysis. The \texttt{ShortRead} packages \texttt{AlignedRead} function performs this, but keeps a lot of data we are not interested in anymore (the sequence and quality scores for each read for instance). So we follow the method of the Bioconductor \texttt{chipseq} package which only stores each reads chromosome, position and direction in a compact \texttt{GenomeData} object.
+\\ \\
+\textbf{Example:}
+<<seqImport, eval=FALSE>>=
+require(chipseq)
+rs1 <- readAligned("./", paste("^",filename,"$", sep=""), type="Bowtie")
+rs1 <- as(rs1, "GenomeData")
+@
+We then save this \texttt{GenomeData} object as an .Rdata file for later use. When working with multiple lanes of sequencing, it is much more convenient to combine them into a single \texttt{GenomeDataList} object.
+\\ \\
+\textbf{Example:}
+<<seqCombine, eval=FALSE>>=
+rs <- GenomeDataList(list("Sample 1"=rs1, "Sample 2"=rs2))
+@
+This \texttt{GenomeDataList} object now can be used as input to our sequencing processing functions.
 
 \subsection{Calculating CpG Density of Specific Regions}
 To calculate the CpG density of specific regions of the genome, the \texttt{cpgDensityCalc} function can be used. The parameter \texttt{locationsTable} can be a data frame with two columns, \texttt{chr} and \texttt{position}. The number \texttt{windowSize} is how many bases upstream and downstream of position to take into account for the calculation. You can weight the CpGs as a function of distance to the centre of the region of interest, if desired.
