@@ -63,6 +63,13 @@ library(aroma.affymetrix)
 library(BSgenome.Hsapiens.UCSC.hg18)
 @
 
+\section{Getting help for the \texttt{Repitools} package}
+
+First, users should consult the documentation available within R.  For example, to access the documentation for the \texttt{cpgDensityCalc}, type \texttt{?cpgDensityCalc} after loading the package.  Alternatively, you may call \texttt{help.start()} and browse the help documents (for all installed packages) through a web browser.
+
+For questions that are not discussed in the function documentation, \texttt{Repitools} has a searchable mailing list, which can be accessed from (authentication required): \\
+\href{https://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/repitools-help}{https://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/repitools-help}
+
 \section{Setting up the \texttt{aroma.affymetrix} environment}
 For the analysis of Affymetrix tiling arrays, Repitools makes heavy use of the \texttt{aroma.affymetrix} package, which requires data and their annotations to be in a specific directory structure (and must be writable by the end-user). The \texttt{RepitoolsExamples} package has the included example data files laid out correctly, and can be setup by executing:
 <<aromaSetup1>>=
