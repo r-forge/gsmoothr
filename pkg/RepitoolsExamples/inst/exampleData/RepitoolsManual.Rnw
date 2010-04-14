@@ -67,7 +67,10 @@ library(BSgenome.Hsapiens.UCSC.hg18)
 
 First, users should consult the documentation available within R.  For example, to access the documentation for the \texttt{cpgDensityCalc}, type \texttt{?cpgDensityCalc} after loading the package.  Alternatively, you may call \texttt{help.start()} and browse the help documents (for all installed packages) through a web browser.
 
-For questions that are not discussed in the function documentation, \texttt{Repitools} has a searchable mailing list, which can be accessed from (authentication required): \\
+For questions that are not discussed in the function documentation, \texttt{Repitools} has a searchable mailing list, which can be accessed from: \\
+\href{https://lists.r-forge.r-project.org/pipermail/repitools-help/}{https://lists.r-forge.r-project.org/pipermail/repitools-help/}
+
+Users can sign up for the mailing list through:
 \href{https://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/repitools-help}{https://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/repitools-help}
 
 \section{Setting up the \texttt{aroma.affymetrix} environment}
@@ -409,11 +412,11 @@ See the \texttt{multiHeatmap} example and documentation for the creating multi-p
 
 \section{Future Directions}
 
-Analyses of next-generation sequencing data, especially for epigenomic data, are in their infancy.  Further implementations will be made available in the near future.  Experiments are encouraged to provide feedback on the implemented routines as well as suggestions for further procedures.
+Analyses of next-generation sequencing data, especially for epigenomic data, are in their infancy.  Further implementations will be made available in the near future.  Experimenters are encouraged to provide feedback on the implemented routines as well as suggestions for further procedures.
 
 
 \section{Environment}
-This user manual was run through \texttt{Sweave} and the $\mathbb{R}$ environment had the following conditions:
+This user manual was built using \texttt{Sweave} with the following $\mathbb{R}$ environment:
 
 <<sInfo>>=
 sessionInfo()
