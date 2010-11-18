@@ -1,7 +1,8 @@
-getDetails<-function(plm,probesets,id="7952953",mart=NULL,verticalBars=FALSE,geneSymbolId="external_gene_id",
-                     transcriptClusterId="Transcript.Cluster.ID",colours="blue",lwd=1,o=NULL, verbose=FALSE) {
-  require(GenomeGraphs)
-  require(biomaRt)
+setMethodS3("getDetails", "ProbeLevelModel",
+   function(plm,probesets,id="7952953",mart=NULL,verticalBars=FALSE,geneSymbolId="external_gene_id",
+            transcriptClusterId="Transcript.Cluster.ID",colours="blue",lwd=1,o=NULL, verbose=FALSE) {
+  library("GenomeGraphs")
+  library("biomaRt")
   cs <- getDataSet(plm)
   rs <- getResidualSet(plm)
   cdf <- getCdf(cs)
@@ -58,4 +59,4 @@ getDetails<-function(plm,probesets,id="7952953",mart=NULL,verticalBars=FALSE,gen
   returnList <- list(ti,ea1,ga,ea2,gr,tr)
   keep <- !sapply(returnList,is.null)
   return(returnList[keep])  
-}
+}) # getDetails

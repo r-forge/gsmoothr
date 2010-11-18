@@ -1,8 +1,8 @@
 
+setMethodS3("plotDecompAroma", "ProbeLevelModel",
+  plotDecompAroma<-function(plm,id="7952953",col="black",lwd=1,vlines=NULL) {
 
-plotDecompAroma<-function(plm,id="7952953",col="black",lwd=1,vlines=NULL) {
-
-  require(aroma.affymetrix)
+  library("aroma.affymetrix")
   
   ces <- getChipEffectSet(plm)
   rs <- getResidualSet(plm)
@@ -41,10 +41,10 @@ plotDecompAroma<-function(plm,id="7952953",col="black",lwd=1,vlines=NULL) {
   abline(v=vlines,lty=3)
   
   invisible(list(data=d,residuals=r,probeeffects=pe,chipeffects=ch,col=col,lwd=lwd))
-}
+}) # plotDecompAroma
 
 
-.plotDecomp<-function(obj,id="7952953",col="black",lwd=1,vlines=NULL) {
+.plotDecomp <- function(obj,id="7952953",col="black",lwd=1,vlines=NULL) {
   par(mfrow=c(2,2))
   pe<-obj@probe.coefs[[id]]
   pe<-c(pe,-sum(pe))

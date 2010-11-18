@@ -1,7 +1,7 @@
 
 FIRMAGene <- function(object, nSamples=2000, seed=1976, cls=NULL, verbose=TRUE, idsToUse=NULL, minProbes=4) {
 
-  require(aroma.affymetrix)
+  library("aroma.affymetrix")
   
   if (is.null(cls)) {
     ds <- getDataSet(object)
