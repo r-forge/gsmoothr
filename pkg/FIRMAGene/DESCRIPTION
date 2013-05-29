@@ -1,6 +1,6 @@
 Package: FIRMAGene
-Version: 0.9.7
-Date: 2011/05/07
+Version: 0.9.8
+Date: 2013/05/29
 Title: FIRMAGene - differential splicing for Affymetrix Gene 1.0 ST
 Author: Mark Robinson <mrobinson@wehi.edu.au>
 Maintainer: Mark Robinson <mrobinson@wehi.edu.au>

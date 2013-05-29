@@ -50,8 +50,11 @@ setMethodS3("getDetails", "ProbeLevelModel",
     gr <- NULL
 	if (verbose)
     print(gr)
-  b <- getBM(geneSymbolId,filters="ensembl_gene_id",values=gid,mart=mart)
-  ti <- new("Title", title = paste(getUnitNames(cdf)[unit],gid,b[1,1],sep=" -- "), dp = DisplayPars(color = "darkred"))
+ if(is.null(gid))
+      b <- ""
+ else
+      b <- getBM(geneSymbolId, filters = "ensembl_gene_id", values = gid, mart = mart)
+  ti <- new("Title", title = paste(getUnitNames(cdf)[unit],gid,b[1],sep=" -- "), dp = DisplayPars(color = "darkred"))
   if( !is.null(gid) )
     tr <- new("Transcript",id=gid,biomart=mart,dp=DisplayPars(plotId=TRUE))
   else

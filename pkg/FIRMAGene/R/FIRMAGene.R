@@ -17,7 +17,7 @@ FIRMAGene <- function(object, nSamples=2000, seed=1976, cls=NULL, verbose=TRUE, 
   
   if(verbose)
     cat("Gathering/calculating residuals.\n")
-  rs<-calculateResiduals(object,verbose=1*verbose)
+  rs<-calculateResidualSet(object,verbose=1*verbose)
   
   if(verbose)
     cat("Reading units.\n")

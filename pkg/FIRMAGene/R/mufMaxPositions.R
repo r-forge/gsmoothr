@@ -7,7 +7,7 @@ mufMaxPositions <- function(object, cls, idsOfInterest, clsOfInterest, verbose=T
   }
   
   # get ResidualSet for PLM fit
-  rs <- calculateResiduals(object,verbose=verbose)
+  rs <- calculateResidualSet(object,verbose=verbose)
   
   # find unit indices for specified ids
   cdf <- getCdf(object)
